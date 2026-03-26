@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | NextGen AutoCare</title>
+    <meta name="description"
+        content="Register your vehicle and join the NextGen AutoCare ecosystem. Get expert technicians, AI diagnostics, and full service history.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            min-height: 100vh;
+        }
+
+        /* ── Split Layout ── */
+        .register-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            min-height: 100vh;
+        }
+
+        /* ── Left Branding Panel ── */
+        .reg-left {
+            position: relative;
+            background: linear-gradient(160deg, #080e1e 0%, #0d1a35 40%, #0a1228 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem;
+            overflow: hidden;
+        }
+
+        .reg-left-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .reg-left-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.1;
+            mix-blend-mode: luminosity;
+        }
+
+        .reg-left-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(160deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+        }
+
+        .reg-orb1 {
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.13) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(50px);
+            z-index: 0;
+        }
+
+        .reg-orb2 {
+            position: absolute;
+            bottom: -150px;
+            left: -100px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+        }
+
+        .reg-left-top,
+        .reg-left-middle,
+        .reg-left-bottom {
+            position: relative;
+            z-index: 1;
+        }
+
+        .reg-brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+        }
+
+        .reg-brand-logo img {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            border: 2px solid rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .reg-brand-logo span {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .reg-hero-text h2 {
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 900;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            color: #fff;
+            margin-bottom: 1.25rem;
+        }
+
+        .reg-hero-text p {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            max-width: 320px;
+        }
+
+        /* Perks list */
+        .reg-perks {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        .reg-perk-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .reg-perk-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Stats bottom */
+        .reg-stats {
+            display: flex;
+            gap: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .reg-stat-item h4 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #818cf8, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .reg-stat-item p {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* ── Right Form Panel ── */
+        .reg-right {
+            background: var(--bg-surface);
+            overflow-y: auto;
+            padding: 3rem 4rem;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .reg-form-wrap {
+            width: 100%;
+            max-width: 640px;
+            padding-top: 1rem;
+        }
+
+        .reg-form-wrap h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
+            color: var(--text-primary);
+        }
+
+        .reg-form-wrap>p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Progress steps */
+        .progress-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+
+        .prog-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .prog-step-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--grad-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .prog-step-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary-light);
+        }
+
+        .prog-line {
+            flex: 1;
+            height: 2px;
+            background: var(--grad-primary);
+            margin: 0 0.5rem;
+            margin-bottom: 1.25rem;
+            border-radius: 99px;
+        }
+
+        /* Section headers */
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-section-header h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Two column grid */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        /* Brand preview */
+        .brand-preview-box {
+            width: 100%;
+            height: 180px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            border: 1px solid var(--glass-border);
+            display: none;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            transition: all 0.4s ease;
+        }
+
+        /* Flash messages */
+        .flash-msg {
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        .flash-error {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .flash-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Password strength */
+        .pw-strength-bar {
+            height: 3px;
+            border-radius: 99px;
+            background: var(--border);
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .pw-strength-fill {
+            height: 100%;
+            border-radius: 99px;
+            width: 0%;
+            transition: width 0.4s ease, background 0.3s ease;
+        }
+
+        /* Submit row */
+        .submit-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.75rem;
+        }
+
+        .btn-reg-submit {
+            flex: 1;
+            height: 52px;
+            font-size: 0.95rem;
+        }
+
+        .btn-signin-link {
+            height: 52px;
+            width: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            transition: all var(--t-base);
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .btn-signin-link:hover {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: var(--glass-hover);
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .register-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .reg-left {
+                display: none;
+            }
+
+            .reg-right {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .span-2 {
+                grid-column: span 1;
+            }
+
+            .submit-row {
+                flex-direction: column;
+            }
+
+            .btn-signin-link {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-wrapper">
+
+        <!-- ── LEFT BRANDING PANEL ── -->
+        <div class="reg-left">
+            <div class="reg-left-bg">
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2048" alt="Luxury car">
+            </div>
+            <div class="reg-orb1"></div>
+            <div class="reg-orb2"></div>
+
+            <div class="reg-left-top animate">
+                <a href="/" class="reg-brand-logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="NextGen AutoCare">
+                    <span>NextGen AutoCare</span>
+                </a>
+            </div>
+
+            <div class="reg-left-middle animate"
+                style="animation-delay: 0.1s; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; padding: 2rem 0;">
+                <div class="reg-hero-text">
+                    <h2>Join the Elite<br><span
+                            style="background: linear-gradient(135deg, #818cf8, #06b6d4); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">AutoCare
+                            Circle.</span></h2>
+                    <p>Register your vehicle profile and unlock premium AI diagnostics, full service history, and expert
+                        care on demand.</p>
+
+                    <div class="reg-perks">
+                        <div class="reg-perk-item">
+                            <div class="reg-perk-icon">
+                                <i data-lucide="cpu" style="width:16px;height:16px;color:#818cf8;"></i>
+                            </div>
+                            <span>AI-powered vehicle diagnostics</span>
+                        </div>
+                        <div class="reg-perk-item">
+                            <div class="reg-perk-icon"
+                                style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2);">
+                                <i data-lucide="clipboard-list" style="width:16px;height:16px;color:#10b981;"></i>
+                            </div>
+                            <span>Complete digital service vault</span>
+                        </div>
+                        <div class="reg-perk-item">
+                            <div class="reg-perk-icon"
+                                style="background: rgba(6,182,212,0.1); border-color: rgba(6,182,212,0.2);">
+                                <i data-lucide="shield-check" style="width:16px;height:16px;color:#06b6d4;"></i>
+                            </div>
+                            <span>Verified brand-certified technicians</span>
+                        </div>
+                        <div class="reg-perk-item">
+                            <div class="reg-perk-icon"
+                                style="background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2);">
+                                <i data-lucide="shopping-bag" style="width:16px;height:16px;color:#f59e0b;"></i>
+                            </div>
+                            <span>Access to genuine OEM parts store</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reg-left-bottom animate" style="animation-delay: 0.2s;">
+                <div class="reg-stats">
+                    <div class="reg-stat-item">
+                        <h4>10K+</h4>
+                        <p>Vehicles<br>Registered</p>
+                    </div>
+                    <div style="width: 1px; background: rgba(255,255,255,0.07);"></div>
+                    <div class="reg-stat-item">
+                        <h4>99%</h4>
+                        <p>Customer<br>Satisfaction</p>
+                    </div>
+                    <div style="width: 1px; background: rgba(255,255,255,0.07);"></div>
+                    <div class="reg-stat-item">
+                        <h4>13+</h4>
+                        <p>Car Brands<br>Supported</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── RIGHT FORM PANEL ── -->
+        <div class="reg-right">
+            <div class="reg-form-wrap animate">
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="flash-msg flash-{{ category }}">
+                    <i data-lucide="{{ 'check-circle' if category == 'success' else 'alert-circle' }}"
+                        style="width:18px;height:18px;flex-shrink:0;"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <h1>Create Account</h1>
+                <p>Fill in your details below to get started — takes less than 2 minutes.</p>
+
+                <!-- Progress indicator -->
+                <div class="progress-steps">
+                    <div class="prog-step">
+                        <div class="prog-step-circle">1</div>
+                        <span class="prog-step-label">Profile</span>
+                    </div>
+                    <div class="prog-line"></div>
+                    <div class="prog-step">
+                        <div class="prog-step-circle">2</div>
+                        <span class="prog-step-label">Vehicle</span>
+                    </div>
+                    <div class="prog-line"></div>
+                    <div class="prog-step">
+                        <div class="prog-step-circle">3</div>
+                        <span class="prog-step-label">Security</span>
+                    </div>
+                </div>
+
+                <form action="/register" method="POST" onsubmit="return validateForm()" autocomplete="off">
+
+                    <!-- Section 1: Personal Info -->
+                    <div class="form-section-header" style="margin-top: 0.5rem;">
+                        <div class="form-section-icon"
+                            style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.2);">
+                            <i data-lucide="user" style="width:17px;height:17px;color:#818cf8;"></i>
+                        </div>
+                        <h3>Personal Information</h3>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label for="reg-name">Owner Full Name</label>
+                            <input type="text" id="reg-name" name="name" placeholder="John Doe" required
+                                autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-phone">Phone Number</label>
+                            <input type="tel" id="reg-phone" name="phone" pattern="[6789][0-9]{9}"
+                                placeholder="9876543210" required>
+                        </div>
+                        <div class="form-group span-2">
+                            <label for="reg-email">Email Address</label>
+                            <input type="email" id="reg-email" name="email" placeholder="john@example.com" required
+                                autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Vehicle Info -->
+                    <div class="form-section-header">
+                        <div class="form-section-icon"
+                            style="background: rgba(6,182,212,0.12); border: 1px solid rgba(6,182,212,0.2);">
+                            <i data-lucide="car" style="width:17px;height:17px;color:#06b6d4;"></i>
+                        </div>
+                        <h3>Vehicle Details</h3>
+                    </div>
+
+                    <!-- Brand preview -->
+                    <div id="brand-preview-container" class="brand-preview-box">
+                        <img id="brand-preview" src="" alt="Brand Preview">
+                    </div>
+
+                    <div class="form-grid-2" style="margin-bottom: 1.5rem;">
+                        <div class="form-group span-2">
+                            <label for="reg-reg-no">Registration Number</label>
+                            <input type="text" id="reg-reg-no" name="reg_no"
+                                pattern="^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$" placeholder="KA01AB1234" required
+                                oninput="this.value = this.value.toUpperCase()">
+                        </div>
+                        <div class="form-group">
+                            <label for="brand">Car Brand</label>
+                            <select name="brand" id="brand" onchange="updateModels()" required>
+                                <option value="">Select Brand</option>
+                                <option value="Maruti Suzuki">Maruti Suzuki</option>
+                                <option value="Hyundai">Hyundai</option>
+                                <option value="Tata Motors">Tata Motors</option>
+                                <option value="Mahindra">Mahindra</option>
+                                <option value="Toyota">Toyota</option>
+                                <option value="Honda">Honda</option>
+                                <option value="BMW">BMW</option>
+                                <option value="Skoda">Skoda</option>
+                                <option value="Kia">Kia</option>
+                                <option value="Volkswagen">Volkswagen</option>
+                                <option value="Renault">Renault</option>
+                                <option value="Audi">Audi</option>
+                                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Model</label>
+                            <select name="model" id="model" required>
+                                <option value="">Select Brand First</option>
+                            </select>
+                        </div>
+                        <div class="form-group span-2">
+                            <label for="reg-year">Manufacturing Year</label>
+                            <input type="number" id="reg-year" name="year" min="1990" max="2026" value="2024" required>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Security -->
+                    <div class="form-section-header">
+                        <div class="form-section-icon"
+                            style="background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.2);">
+                            <i data-lucide="lock" style="width:17px;height:17px;color:#10b981;"></i>
+                        </div>
+                        <h3>Account Security</h3>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-bottom: 0.5rem;">
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" id="password" placeholder="••••••••" required
+                                oninput="checkPasswordStrength(this.value)" autocomplete="new-password">
+                            <div class="pw-strength-bar">
+                                <div class="pw-strength-fill" id="pw-fill"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm_password">Confirm Password</label>
+                            <input type="password" id="confirm_password" placeholder="••••••••" required
+                                autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <p id="error-msg"
+                        style="color: var(--danger); margin: 0.75rem 0; display:none; font-size: 0.875rem; display: none; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0;"></i>
+                        <span id="error-text"></span>
+                    </p>
+
+                    <div class="submit-row">
+                        <button type="submit" class="btn-full btn-reg-submit">
+                            <i data-lucide="user-plus"
+                                style="width:16px;height:16px;display:inline;margin-right:6px;"></i>
+                            Complete Registration
+                        </button>
+                        <a href="/login" class="btn-signin-link">
+                            Sign In →
+                        </a>
+                    </div>
+
+                    <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                        By registering, you agree to our
+                        <a href="#" style="color: var(--primary-light); text-decoration: none;">Terms of Service</a>
+                        and
+                        <a href="#" style="color: var(--primary-light); text-decoration: none;">Privacy Policy</a>.
+                    </p>
+                </form>
+
+                <div
+                    style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                    <a href="/"
+                        style="color: var(--text-muted); text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.4rem; transition: color 0.2s;">
+                        <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+                        Back to Homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const modelsByBrand = {
+            "Maruti Suzuki": ["Swift", "Baleno", "Brezza", "Ertiga", "Grand Vitara"],
+            "Hyundai": ["i20", "Creta", "Verna", "Venue", "Alcazar"],
+            "Tata Motors": ["Nexon", "Punch", "Harrier", "Safari", "Altroz"],
+            "Mahindra": ["XUV700", "Scorpio-N", "Thar", "Bolero", "XUV300"],
+            "Toyota": ["Innova Hycross", "Fortuner", "Glanza", "Urban Cruiser"],
+            "Honda": ["City", "Amaze", "Elevate"],
+            "BMW": ["3 Series", "5 Series", "X1", "X3", "X5"],
+            "Audi": ["A4", "A6", "Q3", "Q5", "Q7"],
+            "Mercedes-Benz": ["C-Class", "E-Class", "GLA", "GLC", "GLE"],
+            "Skoda": ["Karoq", "Fabia", "Octavia", "Superb", "Kodiaq", "Slavia", "Rapid"],
+            "Kia": ["Seltos", "Cerato", "Sportage", "Sorento", "Carens", "Carnival"],
+            "Volkswagen": ["Golf", "T-Cross", "T-Roc", "Tiguan", "Polo", "Vento", "Virtus"],
+            "Renault": ["Kwid", "Duster"]
+        };
+
+        const brandImages = {
+            'Maruti Suzuki': 'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1200',
+            'Hyundai': 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1200',
+            'Tata Motors': 'https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?q=80&w=1200',
+            'Mahindra': 'https://images.unsplash.com/photo-1620608146313-2df67cc85766?q=80&w=1200',
+            'Toyota': 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?q=80&w=1200',
+            'Honda': 'https://images.unsplash.com/photo-1616455572844-825649a67b47?q=80&w=1200',
+            'BMW': 'https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200',
+            'Skoda': 'https://images.unsplash.com/photo-1594541818129-417d4722a84a?q=80&w=1200',
+            'Kia': 'https://images.unsplash.com/photo-1632243193044-8e979827d52b?q=80&w=1200',
+            'Volkswagen': 'https://images.unsplash.com/photo-1617469767053-d3b508a0d182?q=80&w=1200',
+            'Renault': 'https://images.unsplash.com/photo-1613134268686-235b2e5cc8f2?q=80&w=1200',
+            'Audi': 'https://images.unsplash.com/photo-1606152421631-f22758296719?q=80&w=1200',
+            'Mercedes-Benz': 'https://images.unsplash.com/photo-1618843479313-4b88afaa5e6c?q=80&w=1200',
+            'Default': 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200'
+        };
+
+        function updateModels() {
+            const brand = document.getElementById('brand').value;
+            const modelSelect = document.getElementById('model');
+            const previewContainer = document.getElementById('brand-preview-container');
+            const preview = document.getElementById('brand-preview');
+
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+            if (brand) {
+                preview.src = brandImages[brand] || brandImages['Default'];
+                previewContainer.style.display = 'block';
+                previewContainer.style.animation = 'fadeIn 0.4s ease';
+
+                if (modelsByBrand[brand]) {
+                    modelsByBrand[brand].forEach(model => {
+                        const opt = document.createElement('option');
+                        opt.value = model;
+                        opt.textContent = model;
+                        modelSelect.appendChild(opt);
+                    });
+                }
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const fill = document.getElementById('pw-fill');
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            const widths = ['0%', '25%', '50%', '75%', '100%'];
+            const colors = ['transparent', '#f43f5e', '#f59e0b', '#818cf8', '#10b981'];
+            fill.style.width = widths[strength];
+            fill.style.background = colors[strength];
+        }
+
+        function validateForm() {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            const errorMsg = document.getElementById('error-msg');
+            const errorText = document.getElementById('error-text');
+
+            if (pass !== confirm) {
+                errorText.innerText = "Passwords do not match!";
+                errorMsg.style.display = "flex";
+                lucide.createIcons();
+                return false;
+            }
+            if (pass.length < 6) {
+                errorText.innerText = "Password must be at least 6 characters.";
+                errorMsg.style.display = "flex";
+                lucide.createIcons();
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+
+</html>

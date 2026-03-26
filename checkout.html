@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout | NextGen AutoCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background: var(--bg-body);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1000px;
+            width: 90%;
+        }
+
+        .order-summary {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 2.5rem;
+        }
+
+        .checkout-form {
+            padding: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .product-preview {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="checkout-container">
+        <!-- Order Summary -->
+        <div class="order-summary glass animate">
+            <h2 style="margin-bottom: 2rem;">Order Summary</h2>
+            <div class="product-preview">
+                <div style="width: 80px; height: 80px; border-radius: 15px; overflow: hidden; background: #000;">
+                    {% if part.image_url %}
+                    <img src="{{ part.image_url }}" style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"><i
+                            data-lucide="package" style="color:#666"></i></div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 0.3rem;">{{ part.name }}</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">{{ part.brand }}</p>
+                </div>
+            </div>
+
+            <div class="price-row">
+                <span style="color: var(--text-muted);">Item Price</span>
+                <span>₹{{ "{:,.2f}".format(part.price) }}</span>
+            </div>
+            <div class="price-row">
+                <span style="color: var(--text-muted);">Quantity</span>
+                <span id="display-qty">1</span>
+            </div>
+            <div class="price-row">
+                <span style="color: var(--text-muted);">Shipping</span>
+                <span style="color: var(--accent);">Free</span>
+            </div>
+            <div class="total-row">
+                <span>Total Amount</span>
+                <span id="display-total">₹{{ "{:,.2f}".format(part.price) }}</span>
+            </div>
+            <div
+                style="margin-top: 2rem; background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 12px; display: flex; gap: 1rem; align-items: flex-start;">
+                <i data-lucide="shield-check" style="color: var(--primary); width: 20px; flex-shrink: 0;"></i>
+                <p style="font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);">
+                    All parts are authentic OEM certified. Detailed invoice will be sent via SMS/Email after purchase.
+                </p>
+            </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <div class="checkout-form animate" style="animation-delay: 0.2s;">
+            <div style="margin-bottom: 2rem;">
+                <a href="/shop"
+                    style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <i data-lucide="arrow-left" style="width: 16px;"></i> Back to Store
+                </a>
+                <h1>Guest Checkout</h1>
+                <p style="color: var(--text-muted);">No login required. Complete your purchase in seconds.</p>
+            </div>
+
+            <form action="/place_order" method="POST">
+                <input type="hidden" name="part_id" value="{{ part.id }}">
+                <input type="hidden" id="raw-price" value="{{ part.price }}">
+
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <select name="quantity" class="form-control" id="qty-select" onchange="updateTotal()">
+                        {% for i in range(1, 6) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number (for Order Updates)</label>
+                    <input type="tel" name="phone" class="form-control" placeholder="+91 90000 00000" required
+                        pattern="[0-9]{10}">
+                </div>
+
+                <div class="form-group">
+                    <label>Delivery Address</label>
+                    <textarea name="location" class="form-control" rows="3" placeholder="Flat No, Street, City, Pincode"
+                        required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <label
+                            style="cursor: pointer; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.02);">
+                            <input type="radio" name="payment_method" value="UPI/Online" checked>
+                            <span>UPI / Card</span>
+                        </label>
+                        <label
+                            style="cursor: pointer; border: 1px solid var(--border); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.02);">
+                            <input type="radio" name="payment_method" value="COD">
+                            <span>Cash on Delivery</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-full" style="padding: 1.2rem; font-size: 1.1rem; margin-top: 1rem;">
+                    Confirm Order
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+        function updateTotal() {
+            const qty = document.getElementById('qty-select').value;
+            const price = document.getElementById('raw-price').value;
+            const total = qty * price;
+
+            document.getElementById('display-qty').innerText = qty;
+            document.getElementById('display-total').innerText = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genuine Parts Store | NextGen AutoCare</title>
+    <meta name="description"
+        content="Purchase authentic OEM components from our curated inventory. Factory-certified parts for all major car brands.">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            padding-top: var(--nav-h);
+        }
+
+        /* ── Page Layout ── */
+        .shop-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: calc(100vh - var(--nav-h));
+            gap: 0;
+        }
+
+        /* ── Filter Sidebar ── */
+        .filter-sidebar {
+            position: sticky;
+            top: var(--nav-h);
+            height: calc(100vh - var(--nav-h));
+            overflow-y: auto;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1.5rem;
+            scrollbar-width: thin;
+        }
+
+        .filter-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all var(--t-base);
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .filter-search {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border-radius: var(--radius-md);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all var(--t-base);
+        }
+
+        .filter-search:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .filter-apply-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--grad-primary);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--t-base);
+            font-family: 'Inter', sans-serif;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .filter-apply-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .filter-reset-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-decoration: none;
+            margin-top: 0.75rem;
+            transition: color var(--t-base);
+            justify-content: center;
+        }
+
+        .filter-reset-link:hover {
+            color: var(--danger);
+        }
+
+        /* ── Main Content ── */
+        .shop-main {
+            padding: 2.5rem 3rem;
+            overflow: hidden;
+        }
+
+        /* Page header */
+        .shop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .shop-header-left h1 {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -1px;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .shop-header-left p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .shop-count-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius-full);
+            color: var(--primary-light);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* Products grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Product card */
+        .product-card {
+            background: var(--grad-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--t-slow);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .product-card:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+            transform: translateY(-8px);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.12);
+        }
+
+        .product-image-container {
+            height: 210px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s var(--ease-smooth);
+        }
+
+        .product-card:hover .product-image-container img {
+            transform: scale(1.08);
+        }
+
+        .product-image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0.2;
+        }
+
+        /* OEM badge */
+        .badge-exclusive {
+            background: var(--grad-primary);
+            color: white;
+            padding: 0.35rem 0.9rem;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 800;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Category badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .product-card-body {
+            padding: 1.25rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-badges {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .product-card-body h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+            font-family: 'Space Grotesk', sans-serif;
+            line-height: 1.3;
+        }
+
+        .product-compat {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 900;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+        }
+
+        .btn-buy {
+            background: var(--grad-primary);
+            color: white;
+            padding: 0.5rem 1.1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all var(--t-base);
+            box-shadow: 0 4px 12px var(--primary-glow);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-buy:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--primary-glow);
+        }
+
+        /* Empty state */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--grad-card);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-xl);
+        }
+
+        .empty-state h3 {
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            margin: 1rem 0 0.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Sort bar */
+        .sort-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .sort-bar span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .shop-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-sidebar {
+                position: relative;
+                top: 0;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .shop-main {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .shop-header {
+                flex-direction: column;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ── NAVBAR ── -->
+    <nav class="glass pill-nav animate"
+        style="position: fixed; margin: 1rem 5%; width: 90%; border-radius: 100px; top: 1rem;">
+        <a href="/" class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="NextGen AutoCare" class="logo-img">
+            <span>NextGen <span class="text-gradient">AutoCare</span></span>
+        </a>
+        <div class="nav-links">
+            <a href="/#services">Services</a>
+            <a href="/#about">About</a>
+            <a href="/shop" style="color: var(--primary-light);">Parts Store</a>
+            <a href="/login" class="btn-premium" style="padding: 0.6rem 1.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                </svg>
+                Portal Access
+            </a>
+        </div>
+    </nav>
+
+    <!-- ── SHOP LAYOUT ── -->
+    <div class="shop-layout">
+
+        <!-- ── FILTER SIDEBAR ── -->
+        <aside class="filter-sidebar">
+            <p class="filter-title">
+                <i data-lucide="sliders-horizontal" style="width:11px;height:11px;display:inline;margin-right:5px;"></i>
+                Filters
+            </p>
+
+            <form action="/shop" method="GET" id="filter-form">
+
+                <div class="filter-group">
+                    <label>
+                        <i data-lucide="search" style="width:11px;height:11px;display:inline;margin-right:4px;"></i>
+                        Search Parts
+                    </label>
+                    <div class="search-wrapper">
+                        <i data-lucide="search" class="search-icon" style="width:14px;height:14px;"></i>
+                        <input type="text" name="search" class="filter-search" placeholder="Search by name..."
+                            value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>
+                        <i data-lucide="tag" style="width:11px;height:11px;display:inline;margin-right:4px;"></i>
+                        Filter by Brand
+                    </label>
+                    <select name="brand" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Brands</option>
+                        {% for b in brands %}
+                        <option value="{{ b }}" {% if request.args.get('brand')==b %}selected{% endif %}>{{ b }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>
+                        <i data-lucide="car" style="width:11px;height:11px;display:inline;margin-right:4px;"></i>
+                        Filter by Model
+                    </label>
+                    <select name="model" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Models</option>
+                        {% for m in models %}
+                        <option value="{{ m }}" {% if request.args.get('model')==m %}selected{% endif %}>{{ m }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="filter-apply-btn">
+                    <i data-lucide="search" style="width:13px;height:13px;display:inline;margin-right:5px;"></i>
+                    Apply Filters
+                </button>
+
+                <a href="/shop" class="filter-reset-link">
+                    <i data-lucide="x" style="width:12px;height:12px;"></i>
+                    Reset All Filters
+                </a>
+            </form>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                <a href="/"
+                    style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;"
+                    onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">
+                    <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
+                    Return to Home
+                </a>
+            </div>
+        </aside>
+
+        <!-- ── MAIN CONTENT ── -->
+        <main class="shop-main">
+
+            <!-- Header -->
+            <div class="shop-header">
+                <div class="shop-header-left">
+                    <h1>Genuine Parts Catalog</h1>
+                    <p>Factory-certified OEM components — Zero compromise on quality</p>
+                </div>
+                <div class="shop-count-pill">
+                    <i data-lucide="package" style="width:13px;height:13px;"></i>
+                    {{ parts|length }} components
+                </div>
+            </div>
+
+            <!-- Sort bar -->
+            <div class="sort-bar">
+                <i data-lucide="filter" style="width:14px;height:14px;color:var(--text-muted);"></i>
+                <span>Showing <strong style="color:var(--text-primary)">{{ parts|length }}</strong> results</span>
+                {% if request.args.get('brand') %}
+                <span
+                    style="background: rgba(99,102,241,0.1); color: var(--primary-light); padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(99,102,241,0.2);">
+                    Brand: {{ request.args.get('brand') }}
+                </span>
+                {% endif %}
+                {% if request.args.get('model') %}
+                <span
+                    style="background: rgba(6,182,212,0.1); color: var(--secondary); padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(6,182,212,0.2);">
+                    Model: {{ request.args.get('model') }}
+                </span>
+                {% endif %}
+                {% if request.args.get('search') %}
+                <span
+                    style="background: rgba(16,185,129,0.1); color: var(--accent); padding: 0.2rem 0.7rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(16,185,129,0.2);">
+                    Search: "{{ request.args.get('search') }}"
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Products Grid -->
+            {% if parts %}
+            <div class="products-grid">
+                {% for p in parts %}
+                <div class="product-card reveal">
+                    <div class="product-image-container">
+                        {% if p.price > 5000 %}
+                        <span class="badge-exclusive">Genuine OEM</span>
+                        {% endif %}
+                        {% if p.image_url %}
+                        <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy">
+                        {% else %}
+                        <div class="product-image-placeholder">
+                            <i data-lucide="package" style="width: 52px; height: 52px;"></i>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">No Image</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        <div class="product-badges">
+                            <span class="badge"
+                                style="background: rgba(99,102,241,0.1); color: var(--primary-light); border: 1px solid rgba(99,102,241,0.15);">
+                                {{ p.brand or 'Universal' }}
+                            </span>
+                            <span class="badge"
+                                style="background: rgba(16,185,129,0.1); color: var(--accent); border: 1px solid rgba(16,185,129,0.15);">
+                                {{ p.category }}
+                            </span>
+                        </div>
+                        <h3>{{ p.name }}</h3>
+                        <p class="product-compat">
+                            <i data-lucide="check"
+                                style="width:11px;height:11px;display:inline;margin-right:3px;color:var(--accent);"></i>
+                            Fits: {{ p.compatible_model or 'All Models' }}
+                        </p>
+                        <p class="product-desc">
+                            {{ p.description or 'Authentic OEM part verified for quality and performance.' }}
+                        </p>
+                        <div class="product-footer">
+                            <span class="product-price">₹{{ "{:,.0f}".format(p.price) }}</span>
+                            <a href="/buy/{{ p.id }}" class="btn-buy">
+                                <i data-lucide="shopping-cart" style="width:13px;height:13px;"></i>
+                                Buy Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="products-grid">
+                <div class="empty-state">
+                    <i data-lucide="search-x" style="width: 56px; height: 56px; color: var(--text-muted);"></i>
+                    <h3>No parts found</h3>
+                    <p>Try adjusting your filters or search terms to find what you're looking for.</p>
+                    <a href="/shop" class="btn-premium" style="margin-top: 1.5rem; display: inline-flex;">
+                        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>
+                        Clear Filters
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Scroll reveal
+        const revealEls = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.08 });
+        revealEls.forEach(el => observer.observe(el));
+
+        // Navbar scroll effect
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+
+</html>

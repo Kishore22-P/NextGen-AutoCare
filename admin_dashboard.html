@@ -1,0 +1,1466 @@
+<title>Global Command | NextGen AutoService</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background: var(--bg-dark);
+    }
+
+    .sidebar {
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid var(--border);
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        transition: 0.3s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+    }
+
+    .data-table-container {
+        background: var(--bg-card);
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    table {
+        min-width: 1200px;
+    }
+
+    th,
+    td {
+        white-space: nowrap;
+    }
+
+    .customer-info {
+        white-space: normal;
+    }
+
+    .text-gradient {
+        background: var(--grad-primary);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+    }
+
+    .modal {
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+    }
+</style>
+
+<body class="dashboard-grid">
+    <aside class="sidebar">
+        <div style="margin-bottom: 3.5rem; padding: 0 1.5rem;">
+            <a href="/" class="logo" style="font-size: 1.2rem;">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="NextGen" class="logo-img"
+                    style="height: 55px;">
+                <span style="color:var(--text-main); font-weight: 800;">ADMIN</span>
+            </a>
+        </div>
+        <nav style="position: static; padding: 0; display: block; background: transparent; width: 100%;">
+            <ul style="list-style: none;">
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab active"
+                        onclick="showSection(event, 'customers')"><i data-lucide="users"></i> Customers</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab"
+                        onclick="showSection(event, 'emergencies')"><i data-lucide="alert-circle"></i> Emergency
+                        Alerts</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'bookings')"><i
+                            data-lucide="calendar"></i> Service Queue</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab"
+                        onclick="showSection(event, 'technicians')"><i data-lucide="wrench"></i> Technicians</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'payments')"><i
+                            data-lucide="credit-card"></i> Offline Payments</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'feedback')"><i
+                            data-lucide="star"></i> User Feedback</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'inventory')"><i
+                            data-lucide="package"></i> Inventory</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'revenue')"><i
+                            data-lucide="trending-up"></i> Revenue Report</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'washing')"><i
+                            data-lucide="droplet"></i> Washing Queue</a></li>
+
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'alerts')"><i
+                            data-lucide="bell"></i> Service Alerts</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'orders')"><i
+                            data-lucide="shopping-bag"></i> Customer Orders</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'claims')"><i
+                            data-lucide="shield"></i> Insurance Claims</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'guide')"><i
+                            data-lucide="book-open"></i> Project Guide</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection(event, 'settings')"><i
+                            data-lucide="settings"></i> System Settings</a></li>
+                <li style="margin-top: auto; padding-top: 5rem;"><a href="/logout" style="color:var(--danger);"><i
+                            data-lucide="log-out"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 4rem;"
+            class="animate">
+            <div>
+                <span
+                    style="text-transform: uppercase; letter-spacing: 2px; color: var(--primary); font-weight: 700; font-size: 0.75rem;">System
+                    Controller</span>
+                <h1 style="font-size: 2.5rem; margin-top: 0.5rem;">Global <span class="text-gradient">Command Hub</span>
+                </h1>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                <a href="/export_history" class="glass"
+                    style="text-decoration: none; padding: 0.8rem 1.5rem; font-size: 0.85rem; border-radius: 50px; font-weight: 600; display: flex; align-items:center; gap:0.5rem; color:var(--text-main);">
+                    <i data-lucide="download" style="width:16px"></i> Master Export
+                </a>
+                <div class="glass"
+                    style="padding: 0.75rem 1.5rem; border-radius: 50px; font-family: monospace; font-size: 0.8rem; letter-spacing: 1px;">
+                    <i data-lucide="clock" style="width:14px; margin-right: 5px; vertical-align:middle;"></i>
+                    <span id="current-time" style="font-weight: 600; color:var(--primary)"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+
+        <!-- Customers Tab -->
+        <div id="customers-section" class="section-content">
+            <!-- Stats Overview (Moved to Customer Section) -->
+            <div class="stat-grid" style="margin-bottom: 3rem;">
+                <div class="stat-card">
+                    <div class="icon-box"><i data-lucide="users"></i></div>
+                    <h4>Total Customers</h4>
+                    <div class="value">{{ customers|length }}</div>
+                </div>
+                <div class="stat-card" onclick="showSection(null, 'emergencies')" style="cursor:pointer">
+                    <div class="icon-box" style="color:var(--danger); background:rgba(239, 68, 68, 0.1);"><i
+                            data-lucide="alert-triangle"></i></div>
+                    <h4>Active Emergencies</h4>
+                    <div class="value">{{ emergencies|length }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box" style="color:var(--accent); background:rgba(16, 185, 129, 0.1);"><i
+                            data-lucide="check-circle"></i></div>
+                    <h4>Technicians</h4>
+                    <div class="value">{{ technicians|length }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box"><i data-lucide="star" style="color:var(--accent)"></i></div>
+                    <h4>Avg Rating</h4>
+                    <div class="value">
+                        {% set rates = feedbacks | map(attribute='rating') | list %}
+                        {% if rates %}{{ (rates | sum / rates | length) | round(1) }}{% else %}0.0{% endif %}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box"><i data-lucide="wallet"></i></div>
+                    <h4>Pending Payments</h4>
+                    <div class="value">{{ offline_requests|length }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box"><i data-lucide="shopping-cart"></i></div>
+                    <h4>Parts Orders</h4>
+                    <div class="value">{{ orders|length }}</div>
+                </div>
+                <div class="stat-card" onclick="showSection(event, 'revenue')" style="cursor:pointer">
+                    <div class="icon-box" style="color:var(--primary); background:rgba(99, 102, 241, 0.1);"><i
+                            data-lucide="indian-rupee"></i></div>
+                    <h4>Total Revenue</h4>
+                    <div class="value">₹{{ "{:,.0f}".format(gross_revenue) }}</div>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2>Customer Directory</h2>
+                <input type="text" placeholder="Search customers..." style="max-width:300px; padding: 0.6rem 1rem;">
+            </div>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Contact Details</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in customers %}
+                        <tr>
+                            <td>
+                                <div class="customer-info">
+                                    <div class="avatar">{{ c.name[0] }}</div>
+                                    <div>
+                                        <div style="font-weight: 600;">{{ c.name }}</div>
+                                        <div style="font-size: 0.8rem; color:var(--text-muted);">#USER-{{ c.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>{{ c.phone }}</div>
+                                <div style="font-size: 0.85rem; color:var(--text-muted);">{{ c.email }}</div>
+                            </td>
+                            <td><span class="badge"
+                                    style="background:rgba(16, 185, 129, 0.1); color:var(--accent);">Active</span></td>
+                            <td>
+                                <button class="login-btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.85rem; background:transparent; border:1px solid var(--border);"
+                                    onclick="alert('Work Details for {{ c.name }}\nThis customer has registered vehicles and completed services in the system.')">View
+                                    Work</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Service Queue Tab -->
+        <div id="bookings-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Active Service Queue (Bookings)</h2>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booked Date</th>
+                            <th>Service ID</th>
+                            <th>Vehicle</th>
+                            <th>Customer & Contact</th>
+                            <th>Status</th>
+                            <th>Problem Type</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in service_queue %}
+                        <tr>
+                            <td>{{ s.date }}</td>
+                            <td><span class="badge"
+                                    style="background:rgba(99, 102, 241, 0.1); color:var(--primary); font-family:monospace;">#SRV-{{
+                                    s.id }}</span></td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:0.75rem;">
+                                    {% if s.image_url %}
+                                    <img src="{{ s.image_url }}" alt="{{ s.brand }}"
+                                        style="width:50px; height:35px; object-fit:cover; border-radius:6px; border:1px solid var(--border);">
+                                    {% endif %}
+                                    <div>
+                                        <div style="font-weight:700;">{{ s.brand }}</div>
+                                        <div style="font-family:monospace; font-size:0.8rem; color:var(--text-muted);">
+                                            {{ s.reg_no }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight:700;">{{ s.owner_name }}</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);"><i data-lucide="phone"
+                                        style="width:12px; vertical-align:middle;"></i> {{ s.owner_phone }}</div>
+                            </td>
+                            <td>
+                                {% if s.status == 'Pending' %}
+                                <span class="badge"
+                                    style="background:rgba(239, 68, 68, 0.1); color:var(--danger);">Pending</span>
+                                {% elif s.status == 'Scheduled' %}
+                                <span class="badge"
+                                    style="background:rgba(245, 158, 11, 0.1); color:#f59e0b;">Scheduled</span>
+                                {% else %}
+                                <span class="badge" style="background:rgba(16, 185, 129, 0.1); color:var(--accent);">{{
+                                    s.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td title="{{ s.problem }}">{{ s.problem[:30] }}{% if s.problem|length > 30 %}...{% endif %}
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <button class="login-btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;"
+                                        onclick="alert('Problem Details: {{ s.problem }}\n\nVehicle: {{ s.reg_no }}\nContact: {{ s.owner_phone }}')">
+                                        View
+                                    </button>
+                                    <a href="/generate_job_sheet/{{ s.id }}" class="login-btn"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background: var(--accent); text-decoration: none;">
+                                        Job Sheet
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not service_queue %}
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding: 4rem; color:var(--text-muted);">
+                                <i data-lucide="check-circle"
+                                    style="width:32px; height:32px; display:block; margin: 0 auto 1rem;"></i>
+                                No active service bookings in the queue.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Emergencies Tab -->
+        <div id="emergencies-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Active Emergencies</h2>
+            <div class="grid">
+                {% for e in emergencies %}
+                <div class="card glass animate" style="border-left: 4px solid var(--danger); padding: 2rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                        <span class="badge badge-emergency">CRITICAL HELP</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">{{ e.timestamp }}</span>
+                    </div>
+                    <h3 style="margin-bottom:0.5rem;">{{ e.name }}</h3>
+                    <p style="margin-bottom: 1rem;"><i data-lucide="map-pin"
+                            style="width:14px; color:var(--danger);"></i> {{ e.location }}</p>
+                    <div style="background:var(--bg-dark); padding:1rem; border-radius:12px;">
+                        <p><strong>ISSUE:</strong> {{ e.problem }}</p>
+                    </div>
+                    <a href="/resolve_emergency/{{ e.id }}" class="btn-full"
+                        style="margin-top:1.5rem; background:var(--danger); text-decoration:none; text-align:center; display:block;"
+                        onclick="return confirm('Confirm dispatch and resolve this emergency request?')">
+                        Dispatch & Resolve
+                    </a>
+                </div>
+                {% endfor %}
+                {% if not emergencies %}
+                <div class="glass" style="padding: 4rem; text-align: center; grid-column: 1/-1;">
+                    <i data-lucide="check-circle"
+                        style="width:48px; height:48px; color:var(--accent); margin-bottom:1rem;"></i>
+                    <p style="color:var(--text-muted);">No active emergency requests. All quiet!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Technicians Tab -->
+        <div id="technicians-section" class="section-content" style="display:none">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2>Technician Crew</h2>
+                <button class="login-btn" onclick="document.getElementById('tech-modal').style.display='block'">+ Add
+                    Technician</button>
+            </div>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technician</th>
+                            <th>Specialization</th>
+                            <th>Contact</th>
+                            <th>ID</th>
+                            <th>Active Load ⚖️</th>
+                            <th>Jobs</th>
+                            <th>Revenue</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in technicians %}
+                        <tr>
+                            <td>
+                                <div class="customer-info">
+                                    <div class="avatar" style="background:var(--accent);">{{ t.name[0] }}</div>
+                                    <div style="font-weight: 600;">{{ t.name }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    style="background:rgba(99, 102, 241, 0.1); color:var(--primary); font-size: 0.8rem;">
+                                    {{ t.specialization or 'General' }}
+                                </span>
+                            </td>
+                            <td>{{ t.email }}<br><span style="font-size:0.8rem; color:var(--text-muted)">{{ t.phone
+                                    }}</span></td>
+                            <td>#TECH-{{ t.id }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-weight: 700; font-size: 1.1rem;">{{ t.active_services }}</span>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">active</span>
+                                    {% if t.active_services == 0 %}
+                                    <div
+                                        style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent);">
+                                    </div>
+                                    {% elif t.active_services <= 2 %} <div
+                                        style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;">
+                                </div>
+                                {% elif t.active_services <= 4 %} <div
+                                    style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 8px #f59e0b;">
+            </div>
+            {% else %}
+            <div
+                style="width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 8px var(--danger);">
+            </div>
+            {% endif %}
+        </div>
+        </td>
+        <td><span style="font-weight: 600;">{{ t.completed_jobs }}</span></td>
+        <td style="color:var(--accent); font-weight: 700;">₹{{ "{:,.2f}".format(t.total_revenue) }}
+        </td>
+        <td><span class="badge" style="background:rgba(99, 102, 241, 0.1); color:var(--primary);">On-Duty</span>
+        </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        </div>
+        </div>
+
+        <!-- Offline Payments Tab -->
+        <div id="payments-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Pending Offline Settlements</h2>
+            <div class="data-table-container" style="margin-bottom: 3rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service ID</th>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in offline_requests %}
+                        <tr>
+                            <td>#SRV-{{ p.id }}</td>
+                            <td>
+                                <div style="font-weight: 700;">{{ p.owner_name }}</div>
+                                <div style="font-size: 0.8rem; color:var(--text-muted);">{{ p.owner_phone }}</div>
+                            </td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:0.5rem;">
+                                    {% if p.image_url %}
+                                    <img src="{{ p.image_url }}" alt="{{ p.brand }}"
+                                        style="width:40px; height:30px; object-fit:cover; border-radius:4px;">
+                                    {% endif %}
+                                    <span style="font-family: monospace;">{{ p.reg_no }}</span>
+                                </div>
+                            </td>
+                            <td style="font-weight: 700; color:var(--accent);">₹{{ p.parts_cost + p.labor_cost +
+                                (p.wash_cost or 0) }}</td>
+                            <td>
+                                <form action="/pay" method="POST">
+                                    <input type="hidden" name="service_id" value="{{ p.id }}">
+                                    <input type="hidden" name="method" value="online">
+                                    <button type="submit" class="login-btn" style="padding: 0.5rem 1.25rem;">Confirm
+                                        Cash</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Feedback Tab -->
+        <div id="feedback-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Customer Reviews</h2>
+            <div class="grid">
+                {% for f in feedbacks %}
+                <div class="card glass animate" style="padding: 2rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                        <div>
+                            <span style="font-weight: 700; color:var(--primary);">{{ f.owner_name }}</span>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">Vehicle: {{ f.reg_no }}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="color:var(--accent); font-weight:700;">
+                                {% for i in range(f.rating) %}⭐{% endfor %}
+                            </div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">{{ f.date }}</div>
+                        </div>
+                    </div>
+                    <p style="font-style: italic; margin-bottom: 1rem; color: var(--text-muted);">"{{ f.feedback }}"</p>
+                    <div style="border-top:1px solid var(--border); padding-top:1rem; font-size: 0.85rem;">
+                        <strong>Technician:</strong> {{ f.tech_name or 'N/A' }}
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not feedbacks %}
+                <div class="glass" style="padding: 4rem; text-align: center; grid-column: 1/-1;">
+                    <p style="color:var(--text-muted);">No feedback received yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory-section" class="section-content" style="display:none">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2>Spare Parts Inventory</h2>
+                <button class="login-btn" onclick="openInventoryModal()">+ Add New Part</button>
+            </div>
+            {% for category, items in inventory_items.items() %}
+            <h3
+                style="margin: 2.5rem 0 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="tag" style="width: 20px;"></i> {{ category }}
+            </h3>
+            <div class="data-table-container" style="margin-bottom: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Part Name</th>
+                            <th>Cost Price</th>
+                            <th>Sale Price</th>
+                            <th>Stock Level</th>
+                            <th>Public?</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    {% if item.image_url %}
+                                    <img src="{{ item.image_url }}" alt="{{ item.name }}"
+                                        style="width:50px; height:50px; object-fit:cover; border-radius:12px; border:1px solid var(--border);">
+                                    {% else %}
+                                    <div
+                                        style="width:50px; height:50px; background:var(--bg-dark); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                                        <i data-lucide="package" style="width:20px; opacity:0.2;"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div style="font-weight: 600;">{{ item.name }}</div>
+                                        <div style="font-size: 0.8rem; color:var(--text-muted);">{{ item.brand }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: var(--danger);">₹{{ "{:,.2f}".format(item.purchase_price) }}</td>
+                            <td style="color: var(--accent);">₹{{ "{:,.2f}".format(item.price) }}</td>
+                            <td>{{ item.stock }} units</td>
+                            <td>
+                                {% if item.is_for_sale %}
+                                <span class="badge"
+                                    style="background:rgba(99, 102, 241, 0.1); color:var(--primary);">Yes</span>
+                                {% else %}
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.stock > 20 %}
+                                <span class="badge" style="background:rgba(16, 185, 129, 0.1); color:var(--accent);">In
+                                    Stock</span>
+                                {% elif item.stock > 0 %}
+                                <span class="badge" style="background:rgba(245, 158, 11, 0.1); color:#f59e0b;">Low
+                                    Stock</span>
+                                {% else %}
+                                <span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger);">Out
+                                    of Stock</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="login-btn"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.8rem; margin-right: 0.5rem;"
+                                    onclick="editInventory('{{ item.id }}', '{{ item.name }}', '{{ item.category }}', '{{ item.brand }}', '{{ item.compatible_model }}', '{{ item.price }}', '{{ item.purchase_price }}', '{{ item.stock }}', '{{ item.is_for_sale }}', '{{ item.image_url }}')">Edit</button>
+                                <a href="/delete_inventory/{{ item.id }}" class="login-btn"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background:var(--danger); border-color:var(--danger);"
+                                    onclick="return confirm('Delete this item?')">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Inventory Modal -->
+        <div id="inventory-modal" class="glass"
+            style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:3rem; width:500px; z-index:2000;">
+            <h2 id="modal-title">Add New Part</h2>
+            <form action="/update_inventory" method="POST" style="margin-top: 2rem;">
+                <input type="hidden" name="item_id" id="part-id">
+                <div class="form-group">
+                    <label>Part Name</label>
+                    <input type="text" name="name" id="part-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="category" id="part-category" required>
+                        <option value="Engine">Engine</option>
+                        <option value="Braking">Braking</option>
+                        <option value="Filters">Filters</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Fluids">Fluids</option>
+                        <option value="Body">Body</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <input type="text" name="brand" id="part-brand" placeholder="e.g. Bosch, OEM">
+                    </div>
+                    <div class="form-group">
+                        <label>Compatible Model</label>
+                        <input type="text" name="model" id="part-model" placeholder="e.g. Civic 2020 or 'All'">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" name="image_url" id="part-image-url" placeholder="https://example.com/part.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label>Purchase Price (Cost to Shop - ₹)</label>
+                    <input type="number" step="0.01" name="purchase_price" id="part-purchase-price" required>
+                </div>
+                <div class="form-group">
+                    <label>Sale Price (Charge to Customer - ₹)</label>
+                    <input type="number" step="0.01" name="price" id="part-price" required>
+                </div>
+                <div class="form-group">
+                    <label>Current Stock (Updating this adds to Expenses)</label>
+                    <input type="number" name="stock" id="part-stock" required>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" name="is_for_sale" id="part-is-for-sale" value="true" style="width: auto;">
+                    <label for="part-is-for-sale" style="margin: 0; cursor: pointer;">Show on Home Page (Sell to
+                        Public)</label>
+                </div>
+                <button type="submit" class="btn-full">Save Changes</button>
+            </form>
+            <button onclick="document.getElementById('inventory-modal').style.display='none'"
+                style="margin-top:1rem; background:none; border:none; color:var(--text-muted); cursor:pointer">Cancel</button>
+        </div>
+
+        <!-- Revenue Report Section -->
+        <div id="revenue-section" class="section-content" style="display:none">
+            <div style="margin-bottom: 3rem;">
+                <div class="glass" style="padding: 2.5rem; border-radius: 30px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                            <i data-lucide="trending-up" style="color:var(--primary)"></i> Financial Analytics
+                        </h3>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <div style="position: relative;">
+                                <select id="chartRange" onchange="updateChart()"
+                                    style="background: #1e293b; border: 2px solid var(--primary); color: white; padding: 0.6rem 2rem 0.6rem 1rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; border-radius: 12px; font-weight: 600; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                                    <option value="7" style="background: #1e293b; color: white;">Last 7 Days</option>
+                                    <option value="15" style="background: #1e293b; color: white;">Last 15 Days</option>
+                                    <option value="30" style="background: #1e293b; color: white;">Last 30 Days</option>
+                                </select>
+                                <i data-lucide="chevron-down"
+                                    style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--primary); pointer-events: none;"></i>
+                            </div>
+                            <div style="position: relative;">
+                                <select id="chartView" onchange="updateChart()"
+                                    style="background: #1e293b; border: 2px solid var(--accent); color: white; padding: 0.6rem 2rem 0.6rem 1rem; font-family: inherit; font-size: 0.9rem; cursor: pointer; border-radius: 12px; font-weight: 600; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                                    <option value="total" style="background: #1e293b; color: white;">Total Revenue
+                                    </option>
+                                    <option value="detailed" style="background: #1e293b; color: white;">Detailed
+                                        Breakdown</option>
+                                </select>
+                                <i data-lucide="chevron-down"
+                                    style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--accent); pointer-events: none;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2>Total Revenue & Transaction History</h2>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; width: 100%;">
+                    <div class="glass" style="padding: 1rem; border-left: 4px solid var(--primary);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Gross
+                            Revenue</p>
+                        <p style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">₹{{
+                            "{:,.0f}".format(gross_revenue) }}</p>
+                    </div>
+                    <div class="glass" style="padding: 1rem; border-left: 4px solid #ef4444;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Expenses</p>
+                        <p style="font-size: 1.25rem; font-weight: 800; color: #ef4444;">₹{{
+                            "{:,.0f}".format(total_expenses) }}</p>
+                    </div>
+                    <div class="glass" style="padding: 1rem; border-left: 4px solid var(--accent);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Net Profit
+                        </p>
+                        <p style="font-size: 1.25rem; font-weight: 800; color: var(--accent);">₹{{
+                            "{:,.0f}".format(total_revenue) }}</p>
+                    </div>
+                    <div class="glass" style="padding: 1rem; border-left: 4px solid #818cf8;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Tech Shares
+                        </p>
+                        <p style="font-size: 1.25rem; font-weight: 700; color: #818cf8;">₹{{
+                            "{:,.0f}".format(total_tech_payouts) }}</p>
+                    </div>
+                    <div class="glass" style="padding: 1rem; border-left: 4px solid #fbbf24;">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Shop Shares
+                        </p>
+                        <p style="font-size: 1.25rem; font-weight: 700; color: #fbbf24;">₹{{
+                            "{:,.0f}".format(total_center_shares) }}</p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Service ID</th>
+                            <th>Customer / Vehicle</th>
+                            <th>Technician</th>
+                            <th>Parts Cost</th>
+                            <th>Labor Cost</th>
+                            <th>Tech Share</th>
+                            <th>Shop Share</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in completed_services %}
+                        <tr>
+                            <td>{{ s.date }}</td>
+                            <td>#SRV-{{ s.id }}</td>
+                            <td>
+                                <div style="font-weight: 700;">{{ s.owner_name }}</div>
+                                <div style="font-size: 0.8rem; color:var(--text-muted);">{{ s.reg_no }}</div>
+                                <div style="font-size: 0.75rem; color:var(--primary); margin-top: 0.2rem;">
+                                    <i data-lucide="phone" style="width:10px; height:10px; vertical-align:middle;"></i>
+                                    {{ s.owner_phone }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if s.tech_name %}
+                                <div style="font-weight: 600;">{{ s.tech_name }}</div>
+                                <div style="font-size: 0.75rem; color:var(--text-muted);">
+                                    <i data-lucide="mail" style="width:10px; height:10px; vertical-align:middle;"></i>
+                                    {{ s.tech_email }}
+                                </div>
+                                {% else %}
+                                <span style="color:var(--text-muted);">Not Assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ "{:,.2f}".format(s.parts_cost) }}</td>
+                            <td>₹{{ "{:,.2f}".format(s.labor_cost) }}</td>
+                            <td style="color:#818cf8;">₹{{ "{:,.2f}".format(s.tech_commission) }}</td>
+                            <td style="color:#fbbf24;">₹{{ "{:,.2f}".format(s.center_share) }}</td>
+                            <td style="font-weight: 700; color:var(--accent);">₹{{ "{:,.2f}".format(s.row_total) }}</td>
+                            <td>
+                                <button class="login-btn" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;"
+                                    onclick="showServiceDetails('{{ s.id }}', '{{ s.problem }}', '{{ s.parts_details }}', '{{ s.parts_cost }}', '{{ s.labor_cost }}')">
+                                    Details
+                                </button>
+                                <a href="/generate_invoice/{{ s.id }}" class="login-btn"
+                                    style="padding: 0.4rem 0.8rem; font-size: 0.8rem; background:var(--primary); text-decoration:none;">
+                                    <i data-lucide="download" style="width:12px;"></i> Inv
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Washing Queue Tab -->
+        <div id="washing-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Washing & Detailing Queue</h2>
+            <div class="grid">
+                {% for w in wash_queue %}
+                <div class="card glass animate" style="border-left: 4px solid var(--primary);">
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+                        {% if w.image_url %}
+                        <img src="{{ w.image_url }}" alt="{{ w.brand }}"
+                            style="width:80px; height:60px; object-fit:cover; border-radius:12px; border:1px solid var(--border);">
+                        {% endif %}
+                        <div style="flex:1">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <h3>{{ w.reg_no }}</h3>
+                                <span
+                                    class="badge {% if w.status == 'Washing' %}badge-in-service{% else %}badge-pending{% endif %}">
+                                    {{ w.status }}
+                                </span>
+                            </div>
+                            <p style="margin: 0.25rem 0;">Owner: <strong>{{ w.owner_name }}</strong></p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap: 0.5rem; margin-top: 1.5rem;">
+                        {% if w.status == 'Ready for Wash' %}
+                        <form action="/update_wash_status" method="POST" style="flex:1">
+                            <input type="hidden" name="service_id" value="{{ w.id }}">
+                            <input type="hidden" name="status" value="Washing">
+                            <button type="submit" class="login-btn" style="width:100%">Start Washing</button>
+                        </form>
+                        {% else %}
+                        <form action="/update_wash_status" method="POST" style="flex:1">
+                            <input type="hidden" name="service_id" value="{{ w.id }}">
+                            <input type="hidden" name="status" value="Completed">
+                            <button type="submit" class="login-btn" style="width:100%; background:var(--accent)">
+                                <i data-lucide="check" style="width: 14px; display: inline-block;"></i> Finish Wash
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not wash_queue %}
+                <div class="glass" style="padding: 4rem; text-align: center; grid-column: 1/-1;">
+                    <i data-lucide="sparkles"
+                        style="width:48px; height:48px; color:var(--primary); margin-bottom:1rem;"></i>
+                    <p style="color:var(--text-muted);">No vehicles currently in the washing queue.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Service Alerts Tab -->
+        <div id="alerts-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Overdue Care Reminders</h2>
+            <div class="grid">
+                {% for a in overdue_alerts %}
+                <div class="card glass animate" style="border-left: 4px solid var(--danger); padding: 2rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                        <span class="badge"
+                            style="background:rgba(239, 68, 68, 0.1); color:var(--danger);">OVERDUE</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">Due since: {{ a.due_since }}</span>
+                    </div>
+                    <h3>{{ a.reg_no }}</h3>
+                    <p style="margin: 1rem 0;">Customer: <strong>{{ a.owner }}</strong></p>
+                    <div style="display:flex; gap: 1rem;">
+                        <a href="tel:{{ a.phone }}" class="login-btn"
+                            style="text-decoration:none; display:flex; align-items:center; gap:0.5rem;">
+                            <i data-lucide="phone" style="width:16px;"></i> Call Customer
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not overdue_alerts %}
+                <div class="glass" style="padding: 4rem; text-align: center; grid-column: 1/-1;">
+                    <i data-lucide="check-circle"
+                        style="width:48px; height:48px; color:var(--accent); margin-bottom:1rem;"></i>
+                    <p style="color:var(--text-muted);">All vehicles are up to date with their services.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div id="tech-modal" class="glass"
+            style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:3rem; width:500px; z-index:2000;">
+            <h2>Register New Technician</h2>
+            <form action="/create_technician" method="POST" style="margin-top: 2rem;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Specialization</label>
+                    <select name="specialization" required>
+                        <option value="General">General Service</option>
+                        <option value="Engine">Engine Specialist</option>
+                        <option value="Electrical">Electrical Systems</option>
+                        <option value="Transmission">Transmission Expert</option>
+                        <option value="Brakes">Brakes Specialist</option>
+                        <option value="AC/Cooling">AC/Cooling Systems</option>
+                        <option value="Body Work">Body Work & Paint</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-full">Activate Account</button>
+            </form>
+        </div>
+
+
+
+        <!-- Insurance Claims Tab -->
+        <div id="claims-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Insurance Claim Management</h2>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SRV ID</th>
+                            <th>Vehicle & Policy</th>
+                            <th>Customer</th>
+                            <th>Status & Surveyor</th>
+                            <th>Damages</th>
+                            <th>Calculation (₹)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in insurance_claims %}
+                        <tr>
+                            <td>#SRV-{{ c.id }}</td>
+                            <td>
+                                <strong>{{ c.reg_no }}</strong>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">{{ c.insurance_company or 'No
+                                    Policy' }}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">{{ c.policy_no }}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 700;">{{ c.owner_name }}</div>
+                                <div style="font-size: 0.8rem; color:var(--text-muted);">{{ c.owner_phone }}</div>
+                            </td>
+                            <td>
+                                <span class="badge" style="background:rgba(99,102,241,0.1); color:var(--primary);">{{
+                                    c.claim_status or 'Pending' }}</span>
+                                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;">Svr: {{
+                                    c.surveyor_name or 'Not Assigned' }}</div>
+                                <div style="font-size:0.75rem; color:var(--accent); margin-top:0.2rem;">Tech: {{
+                                    c.tech_name or 'Auto' }}</div>
+                            </td>
+                            <td>
+                                <div style="max-width:200px; font-size:0.85rem;" title="{{ c.damage_assessment }}">
+                                    {{ (c.damage_assessment or 'No details yet')[:40] }}...
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-size:0.85rem;">
+                                    <div>Ins: <span style="color:var(--accent); font-weight:700;">₹{{ c.insurance_amount
+                                            }}</span></div>
+                                    <div>Cust: <span style="color:var(--danger);">₹{{ c.customer_deductible }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="login-btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"
+                                    data-id="{{ c.id }}" data-status="{{ c.claim_status or '' }}"
+                                    data-surveyor="{{ c.surveyor_name or '' }}" data-ins="{{ c.insurance_amount }}"
+                                    data-cust="{{ c.customer_deductible }}" onclick="handleClaimClick(this)">
+                                    Assess
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Project Guide Tab -->
+        <div id="guide-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Vehicle Care & Insurance Concepts</h2>
+            <div class="grid">
+                <div class="card glass">
+                    <h3 style="color:var(--primary); margin-bottom:1.5rem;">Core Modules Explained</h3>
+                    <div style="display:grid; gap:1.5rem;">
+                        <div>
+                            <h4 style="margin-bottom:0.5rem;">1. Policy Management</h4>
+                            <p style="font-size:0.9rem; color:var(--text-muted);">Storing insurance carrier name, policy
+                                number, and expiry. In this system, customers add this to their vehicle profile to
+                                enable 'Cashless' booking.</p>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:0.5rem;">2. Surveyor Approval</h4>
+                            <p style="font-size:0.9rem; color:var(--text-muted);">When a claim is filed, the insurance
+                                company sends a <strong>Surveyor</strong> to inspect the damage assessment provided by
+                                our technicians. They approve the 'Estimated Amount'.</p>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:0.5rem;">3. Settlement Calculation</h4>
+                            <p style="font-size:0.9rem; color:var(--text-muted);"><strong>Final Bill = Insurance Share +
+                                    Customer Deductible.</strong> The deductible is a fixed amount the customer pays
+                                regardless of the insurance coverage.</p>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:0.5rem;">4. Cashless Claims</h4>
+                            <p style="font-size:0.9rem; color:var(--text-muted);">The customer only pays the deductible
+                                at the counter. The service center collects the rest directly from the insurance company
+                                after work completion.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card glass">
+                    <h3 style="color:var(--accent); margin-bottom:1.5rem;">Project Data Flow</h3>
+                    <ul style="list-style:none; display:grid; gap:1rem; padding:0;">
+                        <li style="display:flex; gap:1rem; align-items:flex-start;">
+                            <div
+                                style="background:var(--accent); color:black; padding:0.2rem 0.6rem; border-radius:50%; font-weight:800; font-size:0.75rem;">
+                                1</div>
+                            <p style="margin:0; font-size:0.9rem;"><strong>Customer</strong> books a service and checks
+                                'Apply for Insurance Claim'.</p>
+                        </li>
+                        <li style="display:flex; gap:1rem; align-items:flex-start;">
+                            <div
+                                style="background:var(--accent); color:black; padding:0.2rem 0.6rem; border-radius:50%; font-weight:800; font-size:0.75rem;">
+                                2</div>
+                            <p style="margin:0; font-size:0.9rem;"><strong>Technician</strong> inspects the vehicle and
+                                enters 'Damage Assessment' details.</p>
+                        </li>
+                        <li style="display:flex; gap:1rem; align-items:flex-start;">
+                            <div
+                                style="background:var(--accent); color:black; padding:0.2rem 0.6rem; border-radius:50%; font-weight:800; font-size:0.75rem;">
+                                3</div>
+                            <p style="margin:0; font-size:0.9rem;"><strong>Admin</strong> reviews the assessment,
+                                assigns a Surveyor, and enters Approved Amounts.</p>
+                        </li>
+                        <li style="display:flex; gap:1rem; align-items:flex-start;">
+                            <div
+                                style="background:var(--accent); color:black; padding:0.2rem 0.6rem; border-radius:50%; font-weight:800; font-size:0.75rem;">
+                                4</div>
+                            <p style="margin:0; font-size:0.9rem;"><strong>Invoice</strong> automatically splits the
+                                total cost between Insurance and Customer.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="claim-modal" class="glass"
+            style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); padding:3rem; width:500px; z-index:2000;">
+            <h3>Surveyor Claim Assessment</h3>
+            <form action="/update_claim" method="POST" style="margin-top: 2rem;">
+                <input type="hidden" name="service_id" id="claim-srv-id">
+                <div class="form-group">
+                    <label>Claim Status</label>
+                    <select name="claim_status" id="claim-status-select">
+                        <option value="Surveyor Assigned">Surveyor Assigned</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Settled">Settled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Surveyor Name</label>
+                    <input type="text" name="surveyor_name" id="claim-surveyor-name" placeholder="Assigned Surveyor">
+                </div>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label>Approved Insurance (₹)</label>
+                        <input type="number" step="0.1" name="insurance_amount" id="claim-ins-amount">
+                    </div>
+                    <div class="form-group">
+                        <label>Customer Deductible (₹)</label>
+                        <input type="number" step="0.1" name="customer_deductible" id="claim-cust-deductible">
+                    </div>
+                </div>
+                <button type="submit" class="btn-full" style="margin-top:2rem;">Apply Assessment</button>
+            </form>
+            <button onclick="document.getElementById('claim-modal').style.display='none'"
+                style="margin-top:1rem; background:none; border:none; color:var(--text-muted); cursor:pointer; width:100%;">Cancel</button>
+        </div>
+
+
+        <!-- Customer Orders Tab -->
+        <div id="orders-section" class="section-content" style="display:none">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                <h2>Customer Orders (Parts Sales)</h2>
+                <div style="display: flex; gap: 1rem;">
+                    <span class="badge" style="background:rgba(245, 158, 11, 0.1); color:#f59e0b;">{{
+                        orders|selectattr('status', 'equalto', 'Pending')|list|length }} Pending</span>
+                    <span class="badge" style="background:rgba(16, 185, 129, 0.1); color:var(--accent);">{{
+                        orders|selectattr('status', 'equalto', 'Delivered')|list|length }} Delivered</span>
+                </div>
+            </div>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer Details</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in orders %}
+                        <tr>
+                            <td style="font-family: monospace; font-weight: 600;">#ORD-{{ o.id }}</td>
+                            <td>
+                                <div style="font-weight: 600;">{{ o.customer_name }}</div>
+                                <div style="font-size: 0.85rem; color:var(--text-muted);">{{ o.phone }}</div>
+                                <div style="font-size: 0.8rem; color:var(--text-muted); margin-top: 0.3rem;">{{
+                                    o.location }}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600;">{{ o.part_name }}</div>
+                                <div style="font-size: 0.85rem; color:var(--text-muted);">{{ o.brand }}</div>
+                            </td>
+                            <td>{{ o.quantity }}</td>
+                            <td style="font-weight: 700; color:var(--accent);">₹{{ "{:,.2f}".format(o.total_amount) }}
+                            </td>
+                            <td>
+                                <span class="badge"
+                                    style="background:rgba(99, 102, 241, 0.1); color:var(--primary); font-size: 0.75rem;">{{
+                                    o.payment_method }}</span>
+                            </td>
+                            <td style="font-size: 0.85rem;">{{ o.date.strftime('%d %b %Y') if o.date else 'N/A' }}</td>
+                            <td>
+                                {% if o.status == 'Pending' %}
+                                <span class="badge"
+                                    style="background:rgba(245, 158, 11, 0.1); color:#f59e0b;">Pending</span>
+                                {% elif o.status == 'Processing' %}
+                                <span class="badge"
+                                    style="background:rgba(99, 102, 241, 0.1); color:var(--primary);">Processing</span>
+                                {% elif o.status == 'Shipped' %}
+                                <span class="badge"
+                                    style="background:rgba(59, 130, 246, 0.1); color:#3b82f6;">Shipped</span>
+                                {% elif o.status == 'Delivered' %}
+                                <span class="badge"
+                                    style="background:rgba(16, 185, 129, 0.1); color:var(--accent);">Delivered</span>
+                                {% else %}
+                                <span class="badge" style="background:rgba(239, 68, 68, 0.1); color:var(--danger);">{{
+                                    o.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="/update_order_status" method="POST" style="display: inline;">
+                                    <input type="hidden" name="order_id" value="{{ o.id }}">
+                                    <select name="status" class="login-btn"
+                                        style="padding: 0.4rem 0.6rem; font-size: 0.8rem; background:transparent; border:1px solid var(--border); cursor: pointer;"
+                                        onchange="this.form.submit()">
+                                        <option value="Pending" {% if o.status=='Pending' %}selected{% endif %}>Pending
+                                        </option>
+                                        <option value="Processing" {% if o.status=='Processing' %}selected{% endif %}>
+                                            Processing</option>
+                                        <option value="Shipped" {% if o.status=='Shipped' %}selected{% endif %}>Shipped
+                                        </option>
+                                        <option value="Delivered" {% if o.status=='Delivered' %}selected{% endif %}>
+                                            Delivered</option>
+                                        <option value="Cancelled" {% if o.status=='Cancelled' %}selected{% endif %}>
+                                            Cancelled</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not orders %}
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                No orders placed yet.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- System Settings Tab -->
+        <div id="settings-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">System Configuration & Shares</h2>
+            <div class="grid">
+                <div class="card glass animate">
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+                        <div
+                            style="background:rgba(99, 102, 241, 0.1); padding:1rem; border-radius:15px; color:var(--primary);">
+                            <i data-lucide="percent"></i>
+                        </div>
+                        <h3 style="margin:0">Technician Share (Commission)</h3>
+                    </div>
+                    <form action="/update_commission" method="POST">
+                        <div class="form-group">
+                            <label>Current Commission Rate (%)</label>
+                            <input type="number" name="commission_rate" value="{{ tech_commission_rate }}" min="0"
+                                max="100" required
+                                style="font-size: 1.5rem; font-weight: 800; text-align: center; color: var(--primary); background:var(--bg-dark); border:1px solid var(--border); border-radius:12px; width:100%; padding:1rem;">
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 1rem 0;">
+                            This percentage of the **Labor Charge** will be automatically added to the technician's
+                            earnings for every completed job.
+                        </p>
+                        <button type="submit" class="btn-premium btn-full">Increase/Update Share Rate</button>
+                    </form>
+                </div>
+
+                <div class="card glass animate">
+                    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+                        <div
+                            style="background:rgba(16, 185, 129, 0.1); padding:1rem; border-radius:15px; color:var(--accent);">
+                            <i data-lucide="calendar"></i>
+                        </div>
+                        <h3 style="margin:0">Booking Capacity</h3>
+                    </div>
+                    <form action="/update_capacity" method="POST">
+                        <div class="form-group">
+                            <label>Daily Service Slots</label>
+                            <input type="number" name="capacity" value="{{ daily_capacity }}" min="1" required
+                                style="font-size: 1.5rem; font-weight: 800; text-align: center; color: var(--accent); background:var(--bg-dark); border:1px solid var(--border); border-radius:12px; width:100%; padding:1rem;">
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 1rem 0;">
+                            Maximum number of vehicles the center can accept per day. Once reached, booking will be
+                            blocked for that date.
+                        </p>
+                        <button type="submit" class="btn-full" style="background:var(--accent)">Update Service
+                            Capacity</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card glass animate" style="margin-top:2rem; border-left: 4px solid var(--primary);">
+                <h3 style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+                    <i data-lucide="info" style="width:20px;"></i> How Shares Work?
+                </h3>
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap:2rem;">
+                    <div>
+                        <p style="font-size:0.9rem; line-height:1.6;"><strong>When a job is completed:</strong></p>
+                        <ul
+                            style="font-size:0.85rem; color:var(--text-muted); margin-top:0.5rem; list-style:disc; padding-left:1.5rem;">
+                            <li>Technician receives: <code>Labor Charge × {{ tech_commission_rate }}%</code></li>
+                            <li>Shop receives: <code>Remaining Labor + Parts Margin + Wash Fee</code></li>
+                        </ul>
+                    </div>
+                    <div
+                        style="background:var(--bg-dark); padding:1.5rem; border-radius:20px; display:flex; align-items:center;">
+                        <p style="font-size:0.85rem; margin:0; line-height:1.5;">💡 <strong>Pro Tip:</strong> Increasing
+                            the share rate keeps your technicians motivated and rewarding high performance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function showSection(e, id) {
+            if (e) e.preventDefault();
+            document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+            document.getElementById(id + '-section').style.display = 'block';
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (e) {
+                e.currentTarget.classList.add('active');
+            } else {
+                // Find the sidebar tab that matches the ID
+                document.querySelectorAll('.tab').forEach(t => {
+                    if (t.getAttribute('onclick').includes(`'${id}'`)) {
+                        t.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // Live Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-time').innerText = now.toLocaleString('en-US', {
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: true,
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function showServiceDetails(id, problem, parts, partsCost, laborCost) {
+            alert(`Service #SRV-${id}\n\nProblem: ${problem}\n\nWork & Parts:\n${parts}\n\nParts Cost: ₹${partsCost}\nLabor Cost: ₹${laborCost}\nTotal: ₹${(parseFloat(partsCost) + parseFloat(laborCost)).toFixed(2)}`);
+        }
+
+        function openInventoryModal() {
+            document.getElementById('modal-title').innerText = 'Add New Part';
+            document.getElementById('part-id').value = '';
+            document.getElementById('part-name').value = '';
+            document.getElementById('part-category').value = 'General';
+            document.getElementById('part-brand').value = '';
+            document.getElementById('part-model').value = '';
+            document.getElementById('part-image-url').value = '';
+            document.getElementById('part-price').value = '';
+            document.getElementById('part-purchase-price').value = '';
+            document.getElementById('part-stock').value = '';
+            document.getElementById('part-is-for-sale').checked = false;
+            document.getElementById('inventory-modal').style.display = 'block';
+        }
+
+        function editInventory(id, name, category, brand, model, price, purchasePrice, stock, isForSale, imageUrl) {
+            document.getElementById('modal-title').innerText = 'Edit Part';
+            document.getElementById('part-id').value = id;
+            document.getElementById('part-name').value = name;
+            document.getElementById('part-category').value = category;
+            document.getElementById('part-brand').value = brand == 'None' ? '' : brand;
+            document.getElementById('part-model').value = model == 'None' ? '' : model;
+            document.getElementById('part-image-url').value = imageUrl == 'None' ? '' : imageUrl;
+            document.getElementById('part-price').value = price;
+            document.getElementById('part-purchase-price').value = purchasePrice;
+            document.getElementById('part-stock').value = stock;
+            document.getElementById('part-is-for-sale').checked = (isForSale === 'True' || isForSale === 'true' || isForSale === true);
+            document.getElementById('inventory-modal').style.display = 'block';
+        }
+
+
+
+        // --- Advanced Revenue Chart Logic ---
+        let revenueChart;
+        const rawData = {{ analytics_json | tojson }};
+
+        function updateChart() {
+            const range = parseInt(document.getElementById('chartRange').value);
+            const view = document.getElementById('chartView').value;
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+
+            // Slice data based on range
+            const labels = rawData.labels.slice(-range);
+
+            let datasets = [];
+
+            if (view === 'total') {
+                datasets = [{
+                    label: 'Total Revenue (₹)',
+                    data: rawData.total.slice(-range),
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#4f46e5',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }];
+            } else {
+                datasets = [
+                    {
+                        label: 'Labor (₹)',
+                        data: rawData.labor.slice(-range),
+                        borderColor: '#818cf8',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Parts (₹)',
+                        data: rawData.parts.slice(-range),
+                        borderColor: '#10b981',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Wash (₹)',
+                        data: rawData.wash.slice(-range),
+                        borderColor: '#fbbf24',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    }
+                ];
+            }
+
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: view === 'detailed',
+                            position: 'top',
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Plus Jakarta Sans', size: 12 },
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 14, weight: 'bold' },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 13 },
+                            padding: 12,
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#64748b',
+                                font: { family: 'Plus Jakarta Sans' },
+                                callback: value => '₹' + (value >= 1000 ? (value / 1000).toFixed(1) + 'k' : value)
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans' } }
+                        }
+                    },
+                    animations: {
+                        radius: {
+                            duration: 400,
+                            easing: 'linear',
+                            loop: (context) => context.active
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', updateChart);
+        function handleClaimClick(btn) {
+            const d = btn.dataset;
+            openClaimModal(d.id, d.status, d.surveyor, d.ins, d.cust);
+        }
+
+        function openClaimModal(id, status, surveyor, ins, cust) {
+            document.getElementById('claim-srv-id').value = id;
+            document.getElementById('claim-status-select').value = status || 'Surveyor Assigned';
+            document.getElementById('claim-surveyor-name').value = surveyor;
+            document.getElementById('claim-ins-amount').value = ins;
+            document.getElementById('claim-cust-deductible').value = cust;
+            document.getElementById('claim-modal').style.display = 'block';
+        }
+    </script>
+
+    <!-- ─── Global Theme (handled by theme.js floating button) ─── -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+
+</html>

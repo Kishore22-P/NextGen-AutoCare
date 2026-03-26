@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Command | NextGen AutoCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+        }
+
+        .sidebar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+        }
+
+        .card {
+            border-radius: 24px;
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .badge {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            z-index: 10000;
+            display: none;
+            /* Will be flex via JS */
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 32px;
+            position: relative;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes modalPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .reminder-glow {
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+
+        .reminder-glow.overdue {
+            border-left-color: var(--danger);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+        }
+
+        .text-gradient {
+            background: var(--grad-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .vehicle-image-card {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="dashboard-grid">
+    <aside class="sidebar animate">
+        <div style="padding: 0 1.5rem; margin-bottom: 4rem;">
+            <a href="/" class="logo" style="font-size: 1.2rem;">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="NextGen" class="logo-img"
+                    style="height: 55px;">
+                <span style="color:var(--text-main); font-weight: 800;">NextGen</span>
+            </a>
+        </div>
+        <nav style="position: static; padding: 0; display: block; background: transparent;">
+            <ul style="list-style: none;">
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab active" onclick="showSection('dashboard')"><i
+                            data-lucide="layout-grid"></i> Overview</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection('history')"><i
+                            data-lucide="clipboard-list"></i> Care History</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection('health')"><i
+                            data-lucide="activity"></i> Vehicle Health</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection('booking')"><i
+                            data-lucide="calendar"></i> Book Care</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection('insurance')"><i
+                            data-lucide="shield-check"></i> Insurance</a></li>
+                <li style="margin-bottom: 0.5rem;"><a href="#" class="tab" onclick="showSection('emergency')"><i
+                            data-lucide="zap" style="color:var(--danger)"></i> Emergency</a></li>
+                <li style="margin-top: auto; padding-top: 5rem;"><a href="/logout"
+                        style="color:var(--danger); background: rgba(239, 68, 68, 0.05) !important;"><i
+                            data-lucide="log-out"></i> Logout</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3rem;"
+            class="animate reveal reveal-up">
+            <div>
+                <h1 style="font-size: 2rem;">Welcome back, <span class="text-gradient">{{ session['name'] }}</span></h1>
+                <p style="color:var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">Your automotive ecosystem is
+                    up to date.</p>
+            </div>
+            <div style="display:flex; gap: 1rem;">
+                <a href="/export_history" class="glass"
+                    style="padding: 0.8rem 1.5rem; border-radius: 50px; text-decoration: none; color: var(--text-main); display: flex; align-items:center; gap: 0.5rem; font-size: 0.85rem; font-weight: 600;">
+                    <i data-lucide="download" style="width:16px"></i> Export Report
+                </a>
+            </div>
+        </header>
+
+        <div id="dashboard-section" class="section-content">
+            {% if reminders %}
+            <div class="reminders-container" style="margin-bottom: 3rem;">
+                {% for r in reminders %}
+                <div class="card glass animate reminder-glow {% if r.is_overdue %}overdue{% endif %}"
+                    style="display:flex; align-items:center; gap:1.5rem; padding: 1.5rem 2rem;">
+                    <div
+                        style="background: {% if r.is_overdue %}rgba(239,68,68,0.1){% else %}rgba(99,102,241,0.1){% endif %}; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items:center; justify-content:center; color:{% if r.is_overdue %}var(--danger){% else %}var(--primary){% endif %};">
+                        <i data-lucide="bell"></i>
+                    </div>
+                    <div style="flex:1">
+                        <h4 style="margin: 0; font-size: 1.1rem;">Service Due for <span style="color:var(--primary)">{{
+                                r.reg_no }}</span></h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            {% if r.is_overdue %}
+                            <span style="color: var(--danger); font-weight: 800;">CRITICAL: OVERDUE SINCE {{ r.due_date
+                                }}</span>
+                            {% else %}
+                            Proactive maintenance recommended on {{ r.due_date }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <button class="btn-premium" onclick="showSection('booking')"
+                        style="padding: 0.75rem 1.5rem; font-size: 0.85rem; background: {% if r.is_overdue %}var(--danger){% else %}var(--grad-primary){% endif %};">Book
+                        Service</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- New Garage Overview Section -->
+            <div style="margin-bottom: 3rem;" class="reveal reveal-up">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">My Garage</h2>
+                <div class="grid stagger">
+                    {% for v in vehicles %}
+                    <div class="card glass float" style="padding: 1rem; border: 1px solid var(--border);">
+                        {% if v.image_url %}
+                        <img src="{{ v.image_url }}" alt="{{ v.brand }}" class="vehicle-image-card"
+                            style="height: 150px; margin-bottom: 1rem;">
+                        {% else %}
+                        <div
+                            style="width: 100%; height: 150px; background: var(--bg-dark); border-radius: 16px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--border);">
+                            <i data-lucide="car" style="width: 40px; height: 40px; opacity: 0.2;"></i>
+                        </div>
+                        {% endif %}
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.1rem;">{{ v.brand }} {{ v.model }}</h4>
+                                <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">{{ v.reg_no }}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="badge"
+                                    style="background: rgba(16, 185, 129, 0.1); color: var(--accent); font-size: 0.7rem;">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="stat-grid stagger active">
+                <div class="stat-card">
+                    <div class="icon-box"><i data-lucide="car"></i></div>
+                    <h4>Your Garage</h4>
+                    <div class="value">{{ vehicles|length }} <span
+                            style="font-size: 0.9rem; font-weight: 400; color:var(--text-muted)">Vehicles</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box" style="color:var(--accent); background:rgba(16, 185, 129, 0.1);"><i
+                            data-lucide="check-circle"></i></div>
+                    <h4>Total Services</h4>
+                    <div class="value">{{ history|length }} <span
+                            style="font-size: 0.9rem; font-weight: 400; color:var(--text-muted)">Completed</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon-box" style="color:var(--danger); background:rgba(239, 68, 68, 0.1);"><i
+                            data-lucide="activity"></i></div>
+                    <h4>Active Monitoring</h4>
+                    <div class="value">{{ history | rejectattr('status', 'equalto', 'Completed') | list | length }}
+                        <span style="font-size: 0.9rem; font-weight: 400; color:var(--text-muted)">In Progress</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 4rem;" class="reveal reveal-up">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 1.5rem;">Recent Care Activity</h2>
+                    <a href="#" onclick="showSection('history')"
+                        style="color:var(--primary); font-size: 0.9rem; text-decoration: none; font-weight: 600;">View
+                        Full History →</a>
+                </div>
+                <div class="data-table-container reveal reveal-up">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Vehicle</th>
+                                <th>Service Scope</th>
+                                <th>Insurance</th>
+                                <th>Technician</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in history[:5] %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ item.date }}</td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                                        {% if item.image_url %}
+                                        <img src="{{ item.image_url }}" alt="{{ item.brand }}"
+                                            style="width:40px; height:30px; object-fit:cover; border-radius:4px; border:1px solid var(--border);">
+                                        {% endif %}
+                                        <div>
+                                            <div style="font-weight: 700;">{{ item.brand }} {{ item.model }}</div>
+                                            <div style="font-size: 0.75rem; color:var(--text-muted);">{{ item.reg_no }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.problem[:40] }}{% if item.problem|length > 40 %}...{% endif %}</td>
+                                <td>
+                                    {% if item.is_insurance_claim %}
+                                    <span class="badge" style="background:rgba(99,102,241,0.1); color:var(--primary)">{{
+                                        item.claim_status or 'Pending' }}</span>
+                                    {% else %}
+                                    <span style="color:var(--text-muted); font-size:0.8rem;">Self Paid</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div
+                                        style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); font-weight:600;">
+                                        <i data-lucide="wrench" style="width:14px; height:14px;"></i>
+                                        {{ item.tech_name or 'Auto-assigning...' }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-{{ item.status.lower() | replace(' ', '-') }}">{{
+                                        item.status }}</span>
+                                </td>
+                                <td>
+                                    <button class="glass"
+                                        style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 12px; font-weight: 700; color: var(--primary);"
+                                        data-id="{{ item.id }}" data-problem="{{ item.problem | escape }}"
+                                        data-work="{{ (item.parts_details or '') | escape }}"
+                                        data-parts="{{ item.parts_cost or 0 }}" data-labor="{{ item.labor_cost or 0 }}"
+                                        data-status="{{ item.payment_status }}"
+                                        data-tech="{{ (item.tech_name or 'N/A') | escape }}"
+                                        data-isinsurance="{{ 'true' if item.is_insurance_claim else 'false' }}"
+                                        data-claimstatus="{{ item.claim_status or '' }}"
+                                        data-insamount="{{ item.insurance_amount or 0 }}"
+                                        data-custdeductible="{{ item.customer_deductible or 0 }}"
+                                        data-wash="{{ item.wash_cost or 0 }}" onclick="handleBillClick(this)">
+                                        {% if item.payment_status == 'Pending' %}
+                                        Pay Now
+                                        {% else %}
+                                        View Invoice
+                                        {% endif %}
+                                    </button>
+                                    <a href="/generate_job_sheet/{{ item.id }}" class="glass"
+                                        style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 12px; font-weight: 700; color: var(--accent); text-decoration: none; margin-left: 0.5rem;">
+                                        Job Sheet
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Section -->
+        <div id="booking-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Schedule Professional Care</h2>
+            <div class="grid">
+                {% for v in vehicles %}
+                <div class="card glass animate float" style="border-top: 4px solid var(--primary); padding: 2rem;">
+                    {% if v.image_url %}
+                    <img src="{{ v.image_url }}" alt="{{ v.brand }} {{ v.model }}" class="vehicle-image-card">
+                    {% endif %}
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">{{ v.brand }} {{ v.model }}</h3>
+                            <code
+                                style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: 6px; font-weight: 700;">{{ v.reg_no }}</code>
+                        </div>
+                        <i data-lucide="car" style="width: 32px; height: 32px; opacity: 0.2;"></i>
+                    </div>
+
+                    <form action="/book_service" method="POST" style="margin-top: 2.5rem;">
+                        <input type="hidden" name="vehicle_id" value="{{ v.id }}">
+                        <div class="form-group">
+                            <label>Care Type</label>
+                            <select name="service_type" required
+                                style="width: 100%; padding: 0.9rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-dark); color: var(--text-main); font-size: 0.9rem;">
+                                <option value="General">General Service</option>
+                                <option value="Engine">Engine Repair</option>
+                                <option value="Electrical">Electrical System</option>
+                                <option value="Transmission">Transmission</option>
+                                <option value="Brakes">Brakes</option>
+                                <option value="AC/Cooling">AC/Cooling System</option>
+                                <option value="Body Work">Body Work</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Primary Concern / Problem</label>
+                            <textarea name="problem" rows="3" placeholder="Describe the issues or services required..."
+                                oninput="analyzeComplaint(this, 'analyzer-{{ v.id }}')" required></textarea>
+                            <div id="analyzer-{{ v.id }}" style="display:none"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Request Date</label>
+                            <input type="date" name="date" required>
+                        </div>
+                        <div class="form-group"
+                            style="display: flex; align-items: center; gap: 0.5rem; background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: 12px; border: 1px dashed var(--primary);">
+                            <input type="checkbox" name="is_insurance" id="ins_{{ v.id }}"
+                                style="width: 20px; height: 20px;">
+                            <label for="ins_{{ v.id }}" style="margin: 0; cursor: pointer;">
+                                <strong style="color: var(--primary);">Apply for Insurance Claim</strong>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">Cashless
+                                    claim facility for covered damages</p>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-premium btn-full">Submit Booking Request</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div id="history-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Complete Maintenance Log</h2>
+            <div class="data-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Vehicle</th>
+                            <th>Service Work</th>
+                            <th>Technician</th>
+                            <th>Status</th>
+                            <th>Bill & Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in history %}
+                        <tr>
+                            <td>{{ item.date }}</td>
+                            <td>
+                                <strong>{{ item.reg_no }}</strong>
+                                <div style="font-size:0.8rem; color:var(--text-muted)">{{ item.brand }} {{ item.model }}
+                                </div>
+                            </td>
+                            <td>{{ item.problem }}</td>
+                            <td>
+                                <div
+                                    style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); font-weight:600;">
+                                    <i data-lucide="wrench" style="width:14px; height:14px;"></i>
+                                    {{ item.tech_name or 'N/A' }}
+                                </div>
+                            </td>
+                            <td><span class="badge badge-{{ item.status.lower() | replace(' ', '-') }}">{{ item.status
+                                    }}</span></td>
+                            <td>
+                                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                    <button class="glass"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.75rem; color:var(--primary);"
+                                        data-id="{{ item.id }}" data-problem="{{ item.problem | escape }}"
+                                        data-work="{{ (item.parts_details or '') | escape }}"
+                                        data-parts="{{ item.parts_cost or 0 }}" data-labor="{{ item.labor_cost or 0 }}"
+                                        data-status="{{ item.payment_status }}"
+                                        data-tech="{{ (item.tech_name or 'N/A') | escape }}"
+                                        data-isinsurance="{{ 'true' if item.is_insurance_claim else 'false' }}"
+                                        data-claimstatus="{{ item.claim_status or '' }}"
+                                        data-insamount="{{ item.insurance_amount or 0 }}"
+                                        data-custdeductible="{{ item.customer_deductible or 0 }}"
+                                        data-wash="{{ item.wash_cost or 0 }}" onclick="handleBillClick(this)">
+                                        {% if item.payment_status == 'Pending' %}
+                                        Pay Now
+                                        {% else %}
+                                        View Bill
+                                        {% endif %}
+                                    </button>
+                                    <a href="/generate_invoice/{{ item.id }}" class="glass"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.75rem; text-decoration: none; color: var(--text-main); border-color: var(--border); text-align:center;">
+                                        PDF Invoice
+                                    </a>
+                                    <a href="/generate_job_sheet/{{ item.id }}" class="glass"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.75rem; text-decoration: none; color: var(--accent); border-color: var(--border); text-align:center;">
+                                        Download Job Sheet
+                                    </a>
+                                    {% if item.status == 'Completed' and not item.rating %}
+                                    <button class="btn-premium"
+                                        style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: var(--accent);"
+                                        data-id="{{ item.id }}" data-tech="{{ item.tech_name }}"
+                                        onclick="openFeedbackModal(this)">
+                                        Rate Tech
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Vehicle Health Section -->
+        <div id="health-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">🤖 AI-Powered Vehicle Health Analytics</h2>
+            <p style="color:var(--text-muted); margin-bottom: 3rem;">Smart insights based on mileage, service history,
+                and repair frequency</p>
+
+            <div class="grid">
+                {% for v in vehicles %}
+                <div class="card glass animate float" style="border-top: 4px solid var(--primary); padding: 2rem;">
+                    {% if v.image_url %}
+                    <img src="{{ v.image_url }}" alt="{{ v.brand }} {{ v.model }}" class="vehicle-image-card">
+                    {% endif %}
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2rem;">
+                        <div>
+                            <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">{{ v.brand }} {{ v.model }}</h3>
+                            <code
+                                style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: 6px; font-weight: 700;">{{ v.reg_no }}</code>
+                        </div>
+                        <i data-lucide="activity" style="width: 32px; height: 32px; opacity: 0.2;"></i>
+                    </div>
+
+                    <div
+                        style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); padding: 2rem; border-radius: 16px; margin-bottom: 1.5rem; text-align: center;">
+                        <div
+                            style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+                            Health Score</div>
+                        <div id="health-score-{{ v.id }}"
+                            style="font-size: 3rem; font-weight: 800; background: var(--grad-primary); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                            <i data-lucide="loader" class="spin" style="width: 40px; height: 40px;"></i>
+                        </div>
+                        <div id="health-status-{{ v.id }}"
+                            style="font-size: 1rem; color: var(--text-muted); margin-top: 0.5rem;"></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div
+                            style="background: var(--bg-dark); padding: 1rem; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Mileage
+                            </div>
+                            <div id="mileage-{{ v.id }}" style="font-size: 1.25rem; font-weight: 700;">{{
+                                "{:,}".format(v.current_mileage or 0) }} km</div>
+                        </div>
+                        <div
+                            style="background: var(--bg-dark); padding: 1rem; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">Services
+                            </div>
+                            <div id="services-{{ v.id }}" style="font-size: 1.25rem; font-weight: 700;">-</div>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('vehicle_health', vehicle_id=v.id) }}" class="btn-premium btn-full"
+                        style="text-decoration: none; display: block; text-align: center;">
+                        View Detailed Analytics →
+                    </a>
+                </div>
+
+                <script>
+                    // Fetch health data for vehicle {{ v.id }}
+                    fetch('/api/vehicle_health/{{ v.id }}')
+                        .then(res => res.json())
+                        .then(data => {
+                            const scoreEl = document.getElementById('health-score-{{ v.id }}');
+                            const statusEl = document.getElementById('health-status-{{ v.id }}');
+                            const servicesEl = document.getElementById('services-{{ v.id }}');
+
+                            scoreEl.textContent = data.score;
+                            // Remove gradient to allow dynamic color to show
+                            scoreEl.style.background = 'none';
+                            scoreEl.style.webkitTextFillColor = 'initial';
+                            scoreEl.style.backgroundClip = 'initial';
+
+                            statusEl.innerHTML = `<span style="padding: 4px 12px; border-radius: 8px; background: ${data.status_color}20; color: ${data.status_color}; font-weight: 700;">${data.status_icon} ${data.status}</span>`;
+                            servicesEl.textContent = data.total_services;
+
+                            // Color based on score
+                            if (data.score >= 85) {
+                                scoreEl.style.color = '#10b981';
+                            } else if (data.score >= 70) {
+                                scoreEl.style.color = '#3b82f6';
+                            } else if (data.score >= 50) {
+                                scoreEl.style.color = '#f59e0b';
+                            } else {
+                                scoreEl.style.color = '#ef4444';
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to load health data:', err);
+                            document.getElementById('health-score-{{ v.id }}').textContent = 'N/A';
+                            document.getElementById('health-status-{{ v.id }}').textContent = 'Update mileage for analysis';
+                        });
+                </script>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Insurance Section -->
+        <div id="insurance-section" class="section-content" style="display:none">
+            <h2 style="margin-bottom: 2rem;">Insurance Policy Management</h2>
+            <div class="grid">
+                {% for v in vehicles %}
+                <div class="card glass animate">
+                    {% if v.image_url %}
+                    <img src="{{ v.image_url }}" alt="{{ v.brand }} {{ v.model }}" class="vehicle-image-card"
+                        style="height: 120px;">
+                    {% endif %}
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+                        <div>
+                            <h3 style="margin:0">{{ v.brand }} {{ v.model }}</h3>
+                            <code style="color:var(--primary)">{{ v.reg_no }}</code>
+                        </div>
+                        <div style="background:var(--primary); padding:0.5rem; border-radius:12px; color:white;">
+                            <i data-lucide="shield"></i>
+                        </div>
+                    </div>
+
+                    <form action="/update_insurance" method="POST">
+                        <input type="hidden" name="vehicle_id" value="{{ v.id }}">
+                        <div class="form-group">
+                            <label>Insurance Provider</label>
+                            <input type="text" name="insurance_company" value="{{ v.insurance_company or '' }}"
+                                placeholder="e.g. HDFC Ergo, ICICI Lombard">
+                        </div>
+                        <div class="grid" style="grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1rem;">
+                            <div class="form-group">
+                                <label>Policy Number</label>
+                                <input type="text" name="policy_no" value="{{ v.policy_no or '' }}"
+                                    placeholder="POL123456">
+                            </div>
+                            <div class="form-group">
+                                <label>Expiry Date</label>
+                                <input type="date" name="policy_expiry" value="{{ v.policy_expiry or '' }}">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-premium btn-full" style="margin-top:1.5rem">Update Policy
+                            Details</button>
+                    </form>
+
+                    {% if v.policy_expiry %}
+                    <div
+                        style="margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <i data-lucide="check-circle" style="color:var(--accent); width:16px;"></i>
+                            <span style="font-size:0.85rem; font-weight:600;">Policy Verified</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="emergency-section" class="section-content" style="display:none">
+            <div class="glass animate"
+                style="padding:4rem; border: 1px solid rgba(239, 68, 68, 0.2); background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent); border-radius: 40px; text-align: center;">
+                <div
+                    style="background: rgba(239, 68, 68, 0.1); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items:center; justify-content:center; color: var(--danger); margin: 0 auto 2rem;">
+                    <i data-lucide="zap" style="width: 40px; height: 40px;"></i>
+                </div>
+                <h2 style="color:var(--danger); font-size: 2.5rem; margin-bottom: 1rem;">Roadside Emergency</h2>
+                <p style="color:var(--text-muted); max-width: 500px; margin: 0 auto 3rem;">Immediate technical
+                    assistance dispatched to your location. Average response time: 20-30 minutes.</p>
+
+                <form action="/emergency" method="POST" style="max-width: 500px; margin: 0 auto; text-align: left;">
+                    <div class="form-group">
+                        <label>Current Location / Landmark</label>
+                        <input type="text" name="location" placeholder="Enter nearest landmark or GPS link" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Briefly describe the emergency</label>
+                        <textarea name="problem" rows="3" placeholder="e.g., Flat tire, Engine overheating, No start..."
+                            oninput="analyzeComplaint(this, 'analyzer-emergency')" required></textarea>
+                        <div id="analyzer-emergency" style="display:none"></div>
+                    </div>
+                    <button type="submit" class="btn-premium btn-full"
+                        style="background: var(--danger); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);">Request
+                        Instant Recovery</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Feedback Modal -->
+        <div id="feedback-modal-overlay" class="modal-backdrop">
+            <div class="modal" onclick="event.stopPropagation()">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div
+                        style="background: rgba(16, 185, 129, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items:center; justify-content:center; color: var(--accent); margin: 0 auto 1.5rem;">
+                        <i data-lucide="star" style="width: 30px; height: 30px;"></i>
+                    </div>
+                    <h2 style="font-size: 1.5rem;">Rate Your Technician</h2>
+                    <p id="feedback-tech-name" style="color:var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+                    </p>
+                </div>
+
+                <form action="/submit_feedback" method="POST">
+                    <input type="hidden" name="service_id" id="feedback-service-id">
+
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <label
+                            style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Experience
+                            Rating</label>
+                        <div style="display: flex; justify-content: center; gap: 0.75rem; font-size: 2rem;">
+                            {% for i in range(1, 6) %}
+                            <label style="cursor: pointer;">
+                                <input type="radio" name="rating" value="{{ i }}" style="display: none;" required
+                                    onchange="updateStars(this.value)">
+                                <i data-lucide="star" class="star-icon" id="star-{{ i }}"
+                                    style="color: #cbd5e1; fill: none; transition: 0.2s;"></i>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Written Feedback (Optional)</label>
+                        <textarea name="feedback" rows="3"
+                            placeholder="Share your experience with this repair..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-premium btn-full" style="margin-top: 2rem;">Submit Review</button>
+                    <button type="button" onclick="closeFeedbackModal()"
+                        style="background: none; border: none; color: var(--text-muted); cursor: pointer; width: 100%; text-align: center; margin-top: 1rem; font-weight: 600; font-size: 0.9rem;">
+                        Skip for now
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- AI-Powered Payment Backdrop & Modal -->
+        <div id="bill-modal-overlay" class="modal-backdrop" onclick="closeBillModal(event)">
+            <div id="bill-modal" class="modal" onclick="event.stopPropagation()">
+                <div style="text-align: center; margin-bottom: 2.5rem;">
+                    <h2 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px;">Service Statement</h2>
+                    <p id="bill-service-id"
+                        style="color:var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; font-family: monospace; font-weight: 600; opacity: 0.7;">
+                    </p>
+                </div>
+
+                <div style="background: var(--bg-dark); padding: 2rem; border-radius: 24px; margin-bottom: 2rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 1rem; font-size: 0.95rem;">
+                        <span style="color:var(--text-muted)">Parts Total:</span>
+                        <span id="bill-parts" style="font-weight: 700; color:var(--text-main);"></span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 1rem; font-size: 0.95rem;">
+                        <span style="color:var(--text-muted)">Labor Charges:</span>
+                        <span id="bill-labor" style="font-weight: 700; color:var(--text-main);"></span>
+                    </div>
+                    <div id="wash-row"
+                        style="display:none; justify-content:space-between; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                        <span style="color:var(--text-muted)">Washing Charges:</span>
+                        <span id="bill-wash" style="font-weight: 700; color:var(--text-main);"></span>
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: 1.5rem; align-items: baseline;">
+                        <span style="font-weight: 400; color:var(--text-main);">Grand Total:</span>
+                        <span id="bill-total" style="font-weight: 900; color: var(--accent);"></span>
+                    </div>
+                </div>
+
+                <div id="payment-options"></div>
+
+                <button onclick="closeBillModal()"
+                    style="margin-top: 2rem; background: none; border: none; color: var(--text-muted); cursor: pointer; width: 100%; text-align: center; font-weight: 600; font-size: 0.9rem; transition: 0.3s; opacity: 0.6;"
+                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+                    Close Statement
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        function showSection(id) {
+            document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+            const target = document.getElementById(id + '-section');
+            if (target) target.style.display = 'block';
+
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (window.event) {
+                const clickTarget = window.event.currentTarget || window.event.target.closest('a');
+                if (clickTarget) clickTarget.classList.add('active');
+            }
+        }
+
+        function closeBillModal() {
+            document.getElementById('bill-modal').style.display = 'none';
+            document.getElementById('modal-backdrop').style.display = 'none';
+        }
+
+        const complaintMap = [
+            { keywords: ['brake', 'braking', 'noise', 'squeal', 'grinding'], suggestion: 'Possible brake pads worn out', recommendation: 'Recommended: Full brake system inspection' },
+            { keywords: ['overheating', 'temperature', 'hot', 'coolant', 'smoke'], suggestion: 'Cooling system failure or leak', recommendation: 'Recommended: Radiator and coolant level check' },
+            { keywords: ['start', 'battery', 'dead', 'click'], suggestion: 'Battery or charging system issue', recommendation: 'Recommended: Battery health & alternator test' },
+            { keywords: ['oil', 'leak', 'fluid'], suggestion: 'Fluid leak detected', recommendation: 'Recommended: Gasket & seal inspection' },
+            { keywords: ['shak', 'vibrat', 'steering'], suggestion: 'Suspension or alignment issue', recommendation: 'Recommended: Wheel alignment & suspension scan' },
+            { keywords: ['ac', 'cool', 'conditioning', 'hot air'], suggestion: 'AC compressor or gas issue', recommendation: 'Recommended: AC performance service' },
+            { keywords: ['engine', 'light', 'stalling', 'miss'], suggestion: 'Engine management issue', recommendation: 'Recommended: Full OBD-II diagnostic scan' }
+        ];
+
+        function analyzeComplaint(input, analyzerId) {
+            const text = input.value.toLowerCase();
+            const analyzer = document.getElementById(analyzerId);
+
+            if (text.length < 5) {
+                analyzer.style.display = 'none';
+                return;
+            }
+
+            let match = null;
+            for (const item of complaintMap) {
+                if (item.keywords.some(k => text.includes(k))) {
+                    match = item;
+                    break;
+                }
+            }
+
+            if (match) {
+                analyzer.innerHTML = `
+                    <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid var(--primary); padding: 1rem; border-radius: 12px; margin-top: 0.5rem; animation: fadeIn 0.3s ease;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; color:var(--primary); font-weight:700; font-size:0.8rem; margin-bottom:0.4rem;">
+                            <i data-lucide="bot" style="width:16px; height:16px;"></i> AI DIAGNOSTIC SUGGESTION
+                        </div>
+                        <div style="font-size:0.85rem; font-weight:600; color:var(--text-main);">${match.suggestion}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">${match.recommendation}</div>
+                    </div>
+                `;
+                analyzer.style.display = 'block';
+                lucide.createIcons();
+            } else {
+                analyzer.style.display = 'none';
+            }
+        }
+
+        function handleBillClick(btn) {
+            const d = btn.dataset;
+            document.getElementById('bill-service-id').innerText = "#SRV-" + d.id;
+
+            const parts = parseFloat(d.parts);
+            const labor = parseFloat(d.labor);
+            const wash = parseFloat(d.wash || 0);
+            const total = parts + labor + wash;
+
+            document.getElementById('bill-parts').innerText = "₹" + parts.toLocaleString();
+            document.getElementById('bill-labor').innerText = "₹" + labor.toLocaleString();
+
+            const washRow = document.getElementById('wash-row');
+            if (wash > 0) {
+                document.getElementById('bill-wash').innerText = "₹" + wash.toLocaleString();
+                washRow.style.display = 'flex';
+            } else {
+                washRow.style.display = 'none';
+            }
+
+            const billTotal = document.getElementById('bill-total');
+            const options = document.getElementById('payment-options');
+
+            if (d.isinsurance === 'true') {
+                const ins = parseFloat(d.insamount);
+                const cust = parseFloat(d.custdeductible);
+
+                billTotal.innerHTML = `
+                    <div style="text-align:right;">
+                        <div style="font-size:0.9rem; color:var(--text-muted); font-weight:400;">Total Estimate: ₹${total.toLocaleString()}</div>
+                        <div style="font-size:0.9rem; color:var(--primary); font-weight:600;">Insurance Covered: -₹${ins.toLocaleString()}</div>
+                        <div style="margin-top:0.5rem; color:var(--accent);">Final Payable: ₹${cust.toLocaleString()}</div>
+                    </div>
+                `;
+            } else {
+                billTotal.innerText = "₹" + total.toLocaleString();
+            }
+
+            if (d.status === 'Paid') {
+                options.innerHTML = '<div style="background:rgba(16,185,129,0.1); color:var(--accent); padding:1rem; border-radius:15px; text-align:center; font-weight:700;">Invoice Paid ✅</div>';
+            } else if (total <= 0) {
+                options.innerHTML = '<div style="background:rgba(239,68,68,0.05); color:var(--danger); padding:1rem; border-radius:15px; text-align:center; font-size:0.85rem; font-weight:600;">Bill not yet generated by technician. Please wait...</div>';
+            } else {
+                options.innerHTML = `
+                    <form action="/pay" method="POST">
+                        <input type="hidden" name="service_id" value="${d.id}">
+                        <button type="submit" name="method" value="online" class="btn-premium btn-full" style="margin-bottom:1rem">Proceed to Secure Payment</button>
+                        <button type="submit" name="method" value="offline" class="btn-full" style="background:transparent; border:1px solid var(--border); color:var(--text-muted); font-size:0.85rem;">Request Cash Collection</button>
+                    </form>
+                `;
+            }
+            const overlay = document.getElementById('bill-modal-overlay');
+            overlay.style.display = 'flex';
+        }
+
+        function closeBillModal(e) {
+            // If called from backdrop click, e will be present. 
+            // If called from button, e might be undefined.
+            document.getElementById('bill-modal-overlay').style.display = 'none';
+        }
+
+        function openFeedbackModal(btn) {
+            const d = btn.dataset;
+            document.getElementById('feedback-service-id').value = d.id;
+            document.getElementById('feedback-tech-name').innerText = "Technician: " + d.tech;
+            document.getElementById('feedback-modal-overlay').style.display = 'flex';
+            updateStars(0);
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedback-modal-overlay').style.display = 'none';
+        }
+
+        function updateStars(rating) {
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById('star-' + i);
+                if (i <= rating) {
+                    star.style.color = '#f59e0b';
+                    star.style.fill = '#f59e0b';
+                } else {
+                    star.style.color = '#cbd5e1';
+                    star.style.fill = 'none';
+                }
+            }
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</body>
+
+</html>
