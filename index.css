@@ -388,88 +388,29 @@ body::before {
     transform: none !important;
 }
 
-.reveal-up {
-    transform: translateY(50px);
-}
-
-.reveal-down {
-    transform: translateY(-50px);
-}
-
-.reveal-left {
-    transform: translateX(-50px);
-}
-
-.reveal-right {
-    transform: translateX(50px);
-}
+.reveal-up { transform: translateY(50px); }
+.reveal-down { transform: translateY(-50px); }
+.reveal-left { transform: translateX(-50px); }
+.reveal-right { transform: translateX(50px); }
 
 /* Stagger Logic (up to 10 items) */
-.stagger>* {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.6s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.stagger.active>*:nth-child(1) {
-    transition-delay: 0.1s;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.stagger.active>*:nth-child(2) {
-    transition-delay: 0.2s;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.stagger.active>*:nth-child(3) {
-    transition-delay: 0.3s;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.stagger.active>*:nth-child(4) {
-    transition-delay: 0.4s;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.stagger.active>*:nth-child(5) {
-    transition-delay: 0.5s;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.stagger.active>*:nth-child(6) {
-    transition-delay: 0.6s;
-    opacity: 1;
-    transform: translateY(0);
-}
+.stagger > * { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.2, 0, 0, 1); }
+.stagger.active > *:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+.stagger.active > *:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+.stagger.active > *:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+.stagger.active > *:nth-child(4) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+.stagger.active > *:nth-child(5) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+.stagger.active > *:nth-child(6) { transition-delay: 0.6s; opacity: 1; transform: translateY(0); }
 
 /* Micro-Interactions */
-.hover-float {
-    transition: transform 0.3s var(--ease-spring);
-}
+.hover-float { transition: transform 0.3s var(--ease-spring); }
+.hover-float:hover { transform: translateY(-8px) scale(1.02); }
 
-.hover-float:hover {
-    transform: translateY(-8px) scale(1.02);
-}
-
-.glow-on-hover {
-    transition: box-shadow 0.3s ease;
-}
-
-.glow-on-hover:hover {
-    box-shadow: 0 0 30px var(--primary-glow);
-}
+.glow-on-hover { transition: box-shadow 0.3s ease; }
+.glow-on-hover:hover { box-shadow: 0 0 30px var(--primary-glow); }
 
 /* Glass Shimmer Overlay */
-.glass-shimmer {
-    position: relative;
-    overflow: hidden;
-}
-
+.glass-shimmer { position: relative; overflow: hidden; }
 .glass-shimmer::after {
     content: '';
     position: absolute;
@@ -482,7 +423,6 @@ body::before {
     transition: 0.6s;
     pointer-events: none;
 }
-
 .glass-shimmer:hover::after {
     top: 50%;
     left: 50%;
